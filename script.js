@@ -171,6 +171,14 @@ window.updateReportStatus = function(selectEl) {
     }
 };
 
+// Mobile Sidebar Toggle
+window.toggleSidebar = function() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('visible');
+};
+
 // Modals
 window.openReportModal = function() { document.getElementById('report-modal').classList.add('visible'); };
 window.closeReportModal = function() { document.getElementById('report-modal').classList.remove('visible'); };
@@ -506,6 +514,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add active class
             btn.classList.add('active');
             document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        });
+    });
+
+    // Close sidebar on mobile link click
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebar-overlay').classList.remove('visible');
+            }
         });
     });
 
