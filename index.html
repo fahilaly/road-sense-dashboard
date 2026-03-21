@@ -22,8 +22,20 @@
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
 <body>
+<!-- Mobile Header -->
+<div class="mobile-header glass-panel">
+    <div class="logo" style="margin-bottom: 0;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 22L10 2M20 22L14 2M12 10V14M12 4V6M12 18V22"></path>
+        </svg>
+        Road Sense
+    </div>
+    <button class="icon-only-btn" onclick="toggleSidebar()"><ion-icon name="menu-outline"></ion-icon></button>
+</div>
+<div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <div class="app-container">
-    <aside class="sidebar glass-panel">
+    <aside id="sidebar" class="sidebar glass-panel">
         <div class="logo">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 22L10 2M20 22L14 2M12 10V14M12 4V6M12 18V22"></path>
@@ -183,7 +195,7 @@
             <div class="card-header border-bottom">
                 <h2>Predictive Analytics Overview</h2>
             </div>
-            <div class="analytics-kpis" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; padding: 1.5rem 1.5rem 0 1.5rem;">
+            <div class="analytics-kpis">
                 <div class="stat-card" style="background:var(--bg-color); padding: 1.5rem; border-radius:12px; border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
                     <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="warning-outline" style="color:var(--danger); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Predicted Failures (30d)</p>
                     <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;">24 <span style="font-size:1rem; font-weight:500; color:var(--danger);">High Risk</span></h3>
@@ -202,7 +214,7 @@
                     <h3>Projected Defect Escalation (6-Month Forecast)</h3>
                     <div id="deteriorationChart"></div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="bottom-charts-grid">
                     <div class="chart-card">
                         <h3>Detections by Type</h3>
                         <div id="distributionChart"></div>
