@@ -3,279 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road Sense | Real-time Infrastructure Monitoring</title>
+    <title>Road Sense (Prototype) | Real-time Infrastructure Monitoring</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Leaflet Map CSS and JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <!-- Leaflet Heatmap -->
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-
-    <!-- ApexCharts Configuration -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 </head>
 <body>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <!-- Mobile Header -->
-<div class="mobile-header glass-panel">
-    <div class="logo" style="margin-bottom: 0;">
+<div class="mobile-header">
+    <div class="mobile-logo">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 22L10 2M20 22L14 2M12 10V14M12 4V6M12 18V22"></path>
         </svg>
-        Road Sense
+        Road Sense (Prototype)
     </div>
     <button class="icon-only-btn" onclick="toggleSidebar()"><ion-icon name="menu-outline"></ion-icon></button>
 </div>
-<div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <div class="app-container">
-    <aside id="sidebar" class="sidebar glass-panel">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
         <div class="logo">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M4 22L10 2M20 22L14 2M12 10V14M12 4V6M12 18V22"></path>
             </svg>
-            Road Sense
+            Road Sense (Prototype)
         </div>
         <ul class="nav-links">
-            <li><a href="#dashboard" class="active"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
-            <li><a href="#reports"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
-            <li><a href="#analytics"><ion-icon name="pie-chart-outline"></ion-icon> Analytics</a></li>
+            <li><a href="#dashboard" class="active" onclick="closeSidebarOnMobile()"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
+            <li><a href="#map-view" onclick="closeSidebarOnMobile()"><ion-icon name="map-outline"></ion-icon> Map View</a></li>
+            <li><a href="#analytics" onclick="closeSidebarOnMobile()"><ion-icon name="analytics-outline"></ion-icon> Analytics</a></li>
+            <li><a href="#reports" onclick="closeSidebarOnMobile()"><ion-icon name="list-outline"></ion-icon> Reports</a></li>
+            <li><a href="#fleet" onclick="closeSidebarOnMobile()"><ion-icon name="bus-outline"></ion-icon> Fleet</a></li>
+            <li><a href="#settings" onclick="closeSidebarOnMobile()"><ion-icon name="settings-outline"></ion-icon> Settings</a></li>
         </ul>
-        <div class="sidebar-bottom">
-            <div class="weather-widget" style="margin-bottom:1rem;" title="Live Weather Conditions">
-                <ion-icon name="partly-sunny-outline" style="font-size: 1.2rem;"></ion-icon>
-                <span>31°C Riyadh</span>
-            </div>
-            <button class="action-btn w-100" onclick="openReportModal()" style="margin-bottom:1.5rem; justify-content:center; width:100%;"><ion-icon name="add-circle-outline"></ion-icon> New Report</button>
-            <div class="user-profile" style="display:flex; align-items:center; gap:0.75rem; padding-top:1.5rem; border-top:1px solid var(--border-color);">
-                <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" alt="User Avatar">
-                <div style="flex:1;">
-                    <span style="display:block; font-weight:600; font-size:0.85rem; line-height:1;">Admin Role</span>
-                    <span style="display:block; font-size:0.75rem; color:var(--text-muted);">Operations</span>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">FA</div>
+                <div class="user-info">
+                    <p class="name">Fahad Al-Khaldi</p>
+                    <p class="role">Admin - Transport</p>
                 </div>
-                <button class="icon-only-btn" onclick="toggleTheme()" title="Toggle Dark Mode"><ion-icon name="moon-outline" id="theme-icon"></ion-icon></button>
             </div>
         </div>
-    </aside>
+    </nav>
 
-    <main>
-        <section class="hero glass-panel">
-            <div class="hero-content">
-                <span class="badge">Live Monitoring Active</span>
-                <h1>Transforming Vehicles into <span>Smart Infrastructure Sensors</span>.</h1>
-                <p>Road Sense is an IoT-driven platform that utilizes simple vehicle sensors to monitor road conditions. The collected data is then processed and sorted using AI and computer vision to accurately detect potholes, cracks, and degradation for proactive city maintenance.</p>
-                <div class="hero-stats">
-                    <div class="stat-card">
-                        <h3>1,204</h3>
-                        <p>Active Sensors</p>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="top-header">
+            <div class="search-bar">
+                <ion-icon name="search-outline"></ion-icon>
+                <input type="text" placeholder="Search incidents, fleet, or locations...">
+            </div>
+            <div class="header-actions">
+                <div class="weather-widget">
+                    <ion-icon name="sunny-outline"></ion-icon>
+                    <span>28°C Riyadh</span>
+                </div>
+                <button class="icon-btn" title="Export Data" onclick="exportToCSV()"><ion-icon name="download-outline"></ion-icon></button>
+                <button class="icon-btn"><ion-icon name="notifications-outline"></ion-icon><span class="badge"></span></button>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h2>Dashboard Overview</h2>
+                <div class="date-picker">Last 24 Hours <ion-icon name="chevron-down-outline"></ion-icon></div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card urgent">
+                    <div class="stat-icon"><ion-icon name="alert-circle"></ion-icon></div>
+                    <div class="stat-details">
+                        <p class="stat-label">Urgent Issues</p>
+                        <h3 class="stat-value">12</h3>
+                        <p class="stat-change negative"><ion-icon name="trending-up"></ion-icon> +3 since yesterday</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>8,432 km</h3>
-                        <p>Roads Scanned</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><ion-icon name="checkmark-circle"></ion-icon></div>
+                    <div class="stat-details">
+                        <p class="stat-label">Resolved (Weekly)</p>
+                        <h3 class="stat-value">48</h3>
+                        <p class="stat-change positive"><ion-icon name="trending-up"></ion-icon> +15%</p>
                     </div>
-                    <div class="stat-card">
-                        <h3>94%</h3>
-                        <p>Prediction Accuracy</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><ion-icon name="bus"></ion-icon></div>
+                    <div class="stat-details">
+                        <p class="stat-label">IoT Units Active</p>
+                        <h3 class="stat-value">34</h3>
+                        <p class="stat-status online">Healthy</p>
                     </div>
                 </div>
             </div>
-            <div class="hero-visual">
-                <!-- A decorative visual representation of roads -->
-                <div class="radar-container">
-                    <div class="radar"></div>
-                    <div class="radar-point p1"></div>
-                    <div class="radar-point p2 p-warning"></div>
-                    <div class="radar-point p3"></div>
-                </div>
-            </div>
-        </section>
 
-        <section id="dashboard" class="dashboard-grid">
-            <div class="card map-card glass-panel">
-                <div class="card-header">
-                    <h2>Live Detection Map</h2>
-                    <div class="filter-group" style="display:flex; align-items:center;">
-                        <div class="layer-toggles">
-                            <button id="btn-markers" class="action-btn active" onclick="toggleMapLayer('markers')" title="Map Pins"><ion-icon name="location-outline"></ion-icon></button>
-                            <button id="btn-heatmap" class="action-btn" onclick="toggleMapLayer('heatmap')" style="background: var(--bg-color); color: var(--text-secondary);" title="Heatmap Density"><ion-icon name="flame-outline"></ion-icon></button>
+            <!-- Map & Recent Alerts -->
+            <div class="dashboard-main-grid">
+                <div class="map-container card">
+                    <div class="card-header">
+                        <h3>Interactive Risk Map</h3>
+                        <div class="map-toggles">
+                            <button id="toggle-markers" class="toggle-btn active" title="Show Markers"><ion-icon name="location"></ion-icon></button>
+                            <button id="toggle-heatmap" class="toggle-btn" title="Heatmap View"><ion-icon name="flame"></ion-icon></button>
                         </div>
-                        <select id="severity-filter">
-                            <option value="all">All Severities</option>
-                            <option value="high">High (Pothole)</option>
-                            <option value="medium">Medium (Crack)</option>
-                            <option value="low">Low (Bump)</option>
-                        </select>
+                    </div>
+                    <div id="main-map"></div>
+                </div>
+
+                <div class="alerts-sidebar card">
+                    <div class="card-header">
+                        <h3>High Severity Alerts</h3>
+                    </div>
+                    <div class="alerts-list">
+                        <!-- Alerts will be injected here -->
                     </div>
                 </div>
-                <!-- Leaflet Interactive Map -->
-                <div id="map" class="map-container"></div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics" class="content-section">
+            <div class="section-header">
+                <h2>Predictive Analytics Overview (PAO)</h2>
+                <div class="analytics-actions">
+                    <button class="primary-btn"><ion-icon name="refresh-outline"></ion-icon> Re-run Models</button>
+                </div>
             </div>
 
-            <div class="card alerts-card glass-panel">
-                <div class="card-header">
-                    <h2>Recent Detections <span class="live-indicator"></span></h2>
-                </div>
-                <div class="alerts-list" id="alerts-list">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        </section>
-
-        <section id="reports" class="reports-section glass-panel mt-6">
-            <div class="card-header border-bottom" style="display:flex; justify-content:space-between;">
-                <div style="display:flex; align-items:center; gap: 1rem;">
-                    <h2>Incident Reports</h2>
-                    <div class="tabs group-tabs">
-                        <button class="tab-btn active" data-tab="pending">Pending authorities action</button>
-                        <button class="tab-btn" data-tab="handled">Handled Reports</button>
+            <div class="analytics-layout">
+                <div class="analytics-kpis">
+                    <div class="kpi-card glass">
+                        <div class="kpi-icon"><ion-icon name="cash-outline"></ion-icon></div>
+                        <div class="kpi-data">
+                            <p>Estimated Cost Savings</p>
+                            <h3>142,500 <small>SAR</small></h3>
+                            <span class="trend pos">Next 6 Months</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass">
+                        <div class="kpi-icon"><ion-icon name="trending-down-outline"></ion-icon></div>
+                        <div class="kpi-data">
+                            <p>Predicted Decay Rate</p>
+                            <h3>-12.4%</h3>
+                            <span class="trend pos">With proactive repair</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card glass">
+                        <div class="kpi-icon"><ion-icon name="construct-outline"></ion-icon></div>
+                        <div class="kpi-data">
+                            <p>Maintenance Efficiency</p>
+                            <h3>94%</h3>
+                            <span class="trend">Resource Accuracy</span>
+                        </div>
                     </div>
                 </div>
-                <div style="display:flex; gap: 0.5rem; align-items:center;">
-                    <button class="action-btn" onclick="exportCSV()" style="margin-right:1rem; background: var(--surface-solid); color: var(--text-primary); border: 1px solid var(--border-color);"><ion-icon name="download-outline"></ion-icon> Export CSV</button>
-                    <span style="font-size:0.8rem; color:var(--text-secondary); margin-right:0.5rem; font-weight:600;">Filter:</span>
-                    <button class="badge badge-danger" style="margin:0; border:none; cursor:pointer;" onclick="filterReports('high')">High</button>
-                    <button class="badge badge-warning" style="margin:0; border:none; cursor:pointer;" onclick="filterReports('medium')">Medium</button>
-                    <button class="badge badge-success" style="margin:0; border:none; cursor:pointer;" onclick="filterReports('low')">Low</button>
-                    <button class="badge" style="margin:0; background:var(--border-color); color:var(--text-secondary); border:none; cursor:pointer;" onclick="filterReports('all')">All</button>
+
+                <div class="bottom-charts-grid">
+                    <div class="chart-wrapper card">
+                        <h3>Defect Distribution</h3>
+                        <div id="donut-chart"></div>
+                    </div>
+                    <div class="chart-wrapper card">
+                        <h3>6-Month Risk Projection</h3>
+                        <div id="line-chart"></div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Pending Reports Table -->
-            <div class="tab-content active" id="tab-pending">
-                <table class="reports-table">
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports" class="content-section">
+            <div class="section-header">
+                <h2>Incident Reports</h2>
+                <div class="table-filters">
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">Pothole</button>
+                    <button class="filter-btn">Cracks</button>
+                    <button class="filter-btn">Bump</button>
+                </div>
+            </div>
+            <div class="table-container card">
+                <table id="reports-table">
                     <thead>
                         <tr>
-                            <th>Report ID</th>
+                            <th>ID</th>
+                            <th>Type</th>
+                            <th>Severity</th>
                             <th>Location</th>
-                            <th>Issue Type</th>
-                            <th>Source</th>
-                            <th>Date</th>
+                            <th>Date Detected</th>
                             <th>Assignee</th>
                             <th>Status</th>
-                            <th></th>
+                            <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="pending-tbody">
-                        <!-- Populated by JS -->
+                    <tbody>
+                        <!-- Reports will be injected here -->
                     </tbody>
                 </table>
             </div>
-
-            <!-- Handled Reports Table -->
-            <div class="tab-content" id="tab-handled">
-                <table class="reports-table">
-                    <thead>
-                        <tr>
-                            <th>Report ID</th>
-                            <th>Location</th>
-                            <th>Issue Type</th>
-                            <th>Source</th>
-                            <th>Reported By</th>
-                            <th>Repaired On</th>
-                            <th>Contractor</th>
-                            <th>Status</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="handled-tbody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Analytics Placeholder Section -->
-        <section id="analytics" class="analytics-section glass-panel mt-6">
-            <div class="card-header border-bottom">
-                <h2>Predictive Analytics Overview</h2>
-            </div>
-            <div class="analytics-kpis">
-                <div class="stat-card" style="background:var(--bg-color); padding: 1.5rem; border-radius:12px; border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
-                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="warning-outline" style="color:var(--danger); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Predicted Failures (30d)</p>
-                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;">24 <span style="font-size:1rem; font-weight:500; color:var(--danger);">High Risk</span></h3>
-                </div>
-                <div class="stat-card" style="background:var(--bg-color); padding: 1.5rem; border-radius:12px; border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
-                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="trending-down-outline" style="color:var(--success); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Proactive Cost Savings</p>
-                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;"><span style="font-size:1.2rem; font-weight:600; color:var(--text-secondary);">SAR</span> 534,000 <span style="font-size:1rem; font-weight:500; color:var(--success);">YTD</span></h3>
-                </div>
-                <div class="stat-card" style="background:var(--bg-color); padding: 1.5rem; border-radius:12px; border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
-                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="calendar-clear-outline" style="color:var(--primary); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Optimal Maintenance</p>
-                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;">Oct 12-18</h3>
-                </div>
-            </div>
-            <div class="analytics-content" style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem;">
-                <div class="chart-card">
-                    <h3>Projected Defect Escalation (6-Month Forecast)</h3>
-                    <div id="deteriorationChart"></div>
-                </div>
-                <div class="bottom-charts-grid">
-                    <div class="chart-card">
-                        <h3>Detections by Type</h3>
-                        <div id="distributionChart"></div>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Sensor Fleet Uptime</h3>
-                        <div id="uptimeChart"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
-</div> <!-- end app-container -->
-    
-    <!-- Submit Report Modal -->
-    <div id="report-modal" class="modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 2rem;">Submit New Report</h2>
-            <div class="form-group">
-                <label>Location (Street / Intersection)</label>
-                <input type="text" id="report-loc" placeholder="e.g. King Fahad Road" autocomplete="off">
+</div>
+
+<!-- Modal for Evidence -->
+<div id="evidence-modal" class="modal">
+    <div class="modal-content glass">
+        <span class="close-modal">&times;</span>
+        <div class="modal-header">
+            <h2 id="modal-title">Damage Evidence</h2>
+            <span id="modal-severity-badge" class="severity-badge">High Severity</span>
+        </div>
+        <div class="modal-body">
+            <div class="image-container">
+                <div class="ai-overlay">AI DETECTION: 98.4% CONFIDENCE</div>
+                <img id="evidence-img" src="" alt="Damage Evidence">
             </div>
-            <div class="form-group">
-                <label>Issue Type</label>
-                <select id="report-type">
-                    <option value="Deep Pothole">Deep Pothole (High Severity)</option>
-                    <option value="Manhole Cover Sunken">Manhole Cover Sunken (High Severity)</option>
-                    <option value="Surface Crack (Longitudinal)">Surface Crack (Medium Severity)</option>
-                    <option value="Asphalt Degradation">Asphalt Degradation (Medium Severity)</option>
-                    <option value="Uneven Surface / Bump">Uneven Surface / Bump (Low Severity)</option>
-                </select>
-            </div>
-            <div class="modal-actions">
-                <button class="action-btn" style="background: var(--text-muted); color: white;" onclick="closeReportModal()">Cancel</button>
-                <button class="action-btn" onclick="submitReport()"><ion-icon name="send"></ion-icon> Submit Report</button>
+            <div class="evidence-details">
+                <div class="detail-item">
+                    <label>GPS Coordinates</label>
+                    <p id="modal-coords">24.7136, 46.6753</p>
+                </div>
+                <div class="detail-item">
+                    <label>Detection Timestamp</label>
+                    <p id="modal-time">Oct 24, 2023 - 14:32</p>
+                </div>
+                <div class="detail-item">
+                    <label>Suggested Material</label>
+                    <p id="modal-material">Cold-mix Asphalt</p>
+                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Snapshot Evidence Modal -->
-    <div id="snapshot-modal" class="modal">
-        <div class="modal-content snapshot-content" style="max-width: 500px;">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                <h2>Detection Snapshot</h2>
-                <button class="icon-only-btn" onclick="closeSnapshotModal()"><ion-icon name="close-outline"></ion-icon></button>
-            </div>
-            <div class="snapshot-image-container">
-                <img id="snapshot-img" src="" alt="Detection Snapshot">
-                <div id="snapshot-bbox" class="bounding-box"></div>
-            </div>
-            <div class="snapshot-details" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                <p style="margin:0;"><strong>Location:</strong> <span id="snap-loc"></span></p>
-                <p style="margin:0;"><strong>Confidence:</strong> <span id="snap-conf">94%</span></p>
-                <p style="margin:0; grid-column: span 2;"><strong>Detected Issue:</strong> <span id="snap-issue" class="badge badge-danger" style="margin-left:0.5rem; margin-bottom:0;"></span></p>
-            </div>
+        <div class="modal-footer">
+            <button class="secondary-btn" onclick="closeModal()">Close</button>
+            <button class="primary-btn">Generate Work Order</button>
         </div>
     </div>
+</div>
 
-    <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
+<div id="toast-container"></div>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
