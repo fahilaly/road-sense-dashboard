@@ -1,6 +1,6 @@
 <div align="center">
 
-# Road Sense - Smart Infrastructure Monitoring
+# Road Sense - Smart Infrastructure Monitoring (Prototype)
 
 <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop" width="100%" alt="Smart City Infrastructure" style="border-radius: 12px; margin-bottom: 2rem;" />
 
