@@ -522,7 +522,7 @@ select:focus { border-color: var(--primary); }
     vertical-align: middle;
 }
 .reports-table tr:hover td {
-    background: var(--bg-color);
+    background-color: var(--bg-color);
 }
 
 .action-btn {
