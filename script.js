@@ -123,10 +123,42 @@ function generateAlert() {
     }
     if(recentAlerts.length > 50) recentAlerts.pop();
 
-    renderDashboard();
+    // Instead of full dashboard render, just add the new alert to the UI if it matches filter
+    const filter = document.getElementById('severity-filter').value;
+    if (filter === 'all' || issue.severity === filter) {
+        addAlertToUI(newAlert);
+    }
     
     // Add Marker to map
     addMarkerToMap(newAlert);
+}
+
+function addAlertToUI(alert) {
+    const list = document.getElementById('alerts-list');
+    if (!list) return;
+
+    const el = document.createElement('div');
+    el.className = `alert-item border-${alert.issue.severity}`;
+    el.onclick = () => focusOnAlert(alert.lat, alert.lng, alert.loc.name, alert.issue.type, alert.issue.severity);
+
+    el.innerHTML = `
+        <div class="alert-icon icon-${alert.issue.severity}">
+            <ion-icon name="${alert.issue.icon}-outline"></ion-icon>
+        </div>
+        <div class="alert-content">
+            <div class="alert-header">
+                <span class="alert-title">${alert.issue.type}</span>
+                <span class="alert-time">${alert.time}</span>
+            </div>
+            <p class="alert-desc">${alert.loc.name} • ${alert.source.type}: ${alert.source.name}</p>
+        </div>
+    `;
+    
+    // Prepend and maintain a limit for maximum elements for better performance
+    list.prepend(el);
+    if (list.children.length > 50) {
+        list.removeChild(list.lastChild);
+    }
 }
 
 function addMarkerToMap(alert) {
@@ -319,30 +351,30 @@ function renderDashboard() {
 
     // Render Alerts List
     const list = document.getElementById('alerts-list');
-    list.innerHTML = '';
-    recentAlerts.forEach((a, index) => {
+    if (!list) return;
+
+    let listHtml = '';
+    recentAlerts.forEach((a) => {
         // Only show if it matches filter
         if (filter !== 'all' && a.issue.severity !== filter) return;
 
-        const el = document.createElement('div');
-        el.className = `alert-item border-${a.issue.severity}`;
-        // Add click listener to the alert element
-        el.onclick = () => focusOnAlert(a.lat, a.lng, a.loc.name, a.issue.type, a.issue.severity);
-
-        el.innerHTML = `
-            <div class="alert-icon icon-${a.issue.severity}">
-                <ion-icon name="${a.issue.icon}-outline"></ion-icon>
-            </div>
-            <div class="alert-content">
-                <div class="alert-header">
-                    <span class="alert-title">${a.issue.type}</span>
-                    <span class="alert-time">${a.time}</span>
+        listHtml += `
+            <div class="alert-item border-${a.issue.severity}" 
+                 onclick="focusOnAlert(${a.lat}, ${a.lng}, '${a.loc.name.replace(/'/g, "\\'")}', '${a.issue.type.replace(/'/g, "\\'")}', '${a.issue.severity}')">
+                <div class="alert-icon icon-${a.issue.severity}">
+                    <ion-icon name="${a.issue.icon}-outline"></ion-icon>
                 </div>
-                <p class="alert-desc">${a.loc.name} • ${a.source.type}: ${a.source.name}</p>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <span class="alert-title">${a.issue.type}</span>
+                        <span class="alert-time">${a.time}</span>
+                    </div>
+                    <p class="alert-desc">${a.loc.name} • ${a.source.type}: ${a.source.name}</p>
+                </div>
             </div>
         `;
-        list.appendChild(el);
     });
+    list.innerHTML = listHtml;
 }
 
 function renderReports() {
@@ -355,8 +387,9 @@ function renderReports() {
     if (filteredPending.length === 0) {
         pendingBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No pending reports match the selected filter.</td></tr>`;
     } else {
+        let htmlContent = '';
         filteredPending.forEach(r => {
-            pendingBody.innerHTML += `
+            htmlContent += `
                 <tr>
                     <td><strong>${r.id}</strong></td>
                     <td>${r.loc}</td>
@@ -376,13 +409,15 @@ function renderReports() {
                 </tr>
             `;
         });
+        pendingBody.innerHTML = htmlContent;
     }
 
     // Handled
     const handledBody = document.getElementById('handled-tbody');
     handledBody.innerHTML = '';
+    let handledHtml = '';
     handledReports.forEach(r => {
-        handledBody.innerHTML += `
+        handledHtml += `
             <tr>
                 <td><strong>${r.id}</strong></td>
                 <td>${r.loc}</td>
@@ -396,6 +431,7 @@ function renderReports() {
             </tr>
         `;
     });
+    handledBody.innerHTML = handledHtml;
 }
 
 function initCharts() {
@@ -553,18 +589,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sections.forEach(section => observer.observe(section));
 
-    // Fallbacks for Absolute Bottom (Analytics) and Absolute Top (Dashboard)
+    // Throttled Scroll Listener using requestAnimationFrame for smoothness
+    let isTicking = false;
     window.addEventListener('scroll', () => {
-        if ((window.innerHeight + Math.round(window.scrollY)) >= document.body.offsetHeight - 20) {
-            navLinks.forEach(a => a.classList.remove('active'));
-            document.querySelector('.nav-links a[href="#analytics"]').classList.add('active');
+        if (!isTicking) {
+            window.requestAnimationFrame(() => {
+                const scrollPos = window.scrollY;
+                const windowHeight = window.innerHeight;
+                const offsetHeight = document.body.offsetHeight;
+
+                // Absolute bottom check
+                if ((windowHeight + Math.round(scrollPos)) >= offsetHeight - 20) {
+                    navLinks.forEach(a => a.classList.remove('active'));
+                    document.querySelector('.nav-links a[href="#analytics"]').classList.add('active');
+                } else if (scrollPos < 100) {
+                    // Absolute top check
+                    navLinks.forEach(a => a.classList.remove('active'));
+                    const dashboardLink = document.querySelector('.nav-links a[href="#dashboard"]');
+                    if(dashboardLink) dashboardLink.classList.add('active');
+                }
+                
+                isTicking = false;
+            });
+            isTicking = true;
         }
     });
-    
-    // Initial highlight on load
-    if (window.scrollY < 100) {
-        navLinks.forEach(a => a.classList.remove('active'));
-        const dashboardLink = document.querySelector('.nav-links a[href="#dashboard"]');
-        if(dashboardLink) dashboardLink.classList.add('active');
-    }
 });
