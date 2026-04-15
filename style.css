@@ -270,7 +270,7 @@ main {
     border: 1px solid rgba(37, 99, 235, 0.2);
 }
 @keyframes radar-scan {
-    form { transform: rotate(0deg); }
+    from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
@@ -599,6 +599,20 @@ select:focus { border-color: var(--primary); }
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
+}
+
+/* Live Hardware Feed Section */
+.live-feed-section {
+    min-height: 400px;
+}
+.live-feed-section .dashboard-grid {
+    gap: 1.5rem;
+}
+.live-feed-section .alerts-list {
+    max-height: 450px;
+}
+.live-feed-section .map-container {
+    border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
 }
 
 /* Responsive */
