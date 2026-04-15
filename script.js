@@ -38,6 +38,12 @@ let heatLayer;
 let currentMapLayer = 'markers';
 const fleetMarkers = [];
 let recentAlerts = [];
+let ws = null;
+let hwConnected = false;
+let routeIndex = 0;
+let liveMap = null;
+let liveMarkers = [];
+let liveDetectionCount = 0;
 let pendingReports = [
     { id: 'RS-9402', loc: locations[0].name, type: issueTypes[0], source: reportSources[0], date: '2 Mins ago' },
     { id: 'RS-9401', loc: locations[1].name, type: issueTypes[1], source: reportSources[1], date: '15 Mins ago' },
@@ -150,7 +156,7 @@ function addAlertToUI(alert) {
                 <span class="alert-title">${alert.issue.type}</span>
                 <span class="alert-time">${alert.time}</span>
             </div>
-            <p class="alert-desc">${alert.loc.name} • ${alert.source.type}: ${alert.source.name}</p>
+            <p class="alert-desc">${alert.loc.name} \u2022 ${alert.source.type}: ${alert.source.name}</p>
         </div>
     `;
     
@@ -308,6 +314,207 @@ window.openSnapshotModal = function(loc, type, sev, conf) {
 };
 window.closeSnapshotModal = function() { document.getElementById('snapshot-modal').classList.remove('visible'); };
 
+// ===================================================
+//  REAL HARDWARE DATA INTEGRATION (Live Feed Tab)
+//  Completely separate from the mock demo dashboard
+// ===================================================
+
+function initLiveMap() {
+    if (!document.getElementById('live-map')) return;
+
+    liveMap = L.map('live-map', {
+        zoomControl: true,
+        scrollWheelZoom: true
+    }).setView([24.7136, 46.6753], 12);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(liveMap);
+
+    // Fix map rendering when section scrolls into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) liveMap.invalidateSize();
+        });
+    });
+    observer.observe(document.getElementById('live-feed'));
+}
+
+function connectWebSocket() {
+    // Only connect if served from a web server (not file://)
+    if (window.location.protocol === 'file:') {
+        console.log('[HW] Running from file:// \u2014 WebSocket disabled.');
+        console.log('[HW] Run the Node.js server: npm start');
+        console.log('[HW] Then open: http://localhost:3000');
+        return;
+    }
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}`;
+
+    console.log(`[HW] Connecting to ${wsUrl}...`);
+    ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+        console.log('[HW] Connected to Road Sense server');
+        updateHWStatus(true);
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            handleRealSensorData(data);
+        } catch (e) {
+            console.error('[HW] Parse error:', e);
+        }
+    };
+
+    ws.onclose = () => {
+        console.log('[HW] Disconnected. Reconnecting in 3s...');
+        updateHWStatus(false);
+        setTimeout(connectWebSocket, 3000);
+    };
+
+    ws.onerror = () => {
+        ws.close();
+    };
+}
+
+function handleRealSensorData(data) {
+    // Always update sensor readout panel
+    updateSensorDisplay(data);
+
+    if (data.type === 'heartbeat') {
+        updateHWStatus(true, data.device_id);
+        return;
+    }
+
+    if (data.type === 'detection') {
+        updateHWStatus(true, data.device_id);
+
+        // Increment counter
+        liveDetectionCount++;
+        const countEl = document.getElementById('live-detection-count');
+        if (countEl) countEl.textContent = `${liveDetectionCount} detection${liveDetectionCount !== 1 ? 's' : ''}`;
+
+        // Pick a Riyadh location (cycling through since no GPS)
+        const loc = locations[routeIndex % locations.length];
+        routeIndex++;
+
+        const latOffset = (Math.random() - 0.5) * 0.015;
+        const lngOffset = (Math.random() - 0.5) * 0.015;
+        const lat = loc.lat + latOffset;
+        const lng = loc.lng + lngOffset;
+
+        // Map severity to issue types
+        const issueMap = {
+            'high':   issueTypes[0],  // Deep Pothole
+            'medium': issueTypes[1],  // Surface Crack
+            'low':    issueTypes[2]   // Uneven Surface / Bump
+        };
+        const issue = issueMap[data.severity] || issueTypes[2];
+
+        const time = new Date().toLocaleTimeString([], {
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+
+        // -- Add marker to LIVE map only --
+        if (liveMap) {
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="marker-pin ${issue.severity}"><ion-icon class="marker-icon" name="${issue.icon}-outline"></ion-icon></div>`,
+                iconSize: [30, 42],
+                iconAnchor: [15, 42],
+                popupAnchor: [0, -35]
+            });
+
+            const popupContent = `<b>\ud83d\udd27 ${issue.type}</b><br>${loc.name}<br>Severity: ${data.severity.toUpperCase()}<br>Magnitude: ${Number(data.magnitude).toFixed(2)}g<br><small>Source: ${data.device_id}</small>`;
+
+            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(liveMap);
+            marker.bindPopup(popupContent);
+            liveMarkers.push(marker);
+
+            // Pan to newest detection
+            liveMap.flyTo([lat, lng], 14, { animate: true, duration: 1 });
+        }
+
+        // -- Add alert to LIVE alerts list only --
+        const list = document.getElementById('live-alerts-list');
+        if (list) {
+            // Remove the placeholder if it's the first detection
+            if (liveDetectionCount === 1) list.innerHTML = '';
+
+            const el = document.createElement('div');
+            el.className = `alert-item border-${issue.severity}`;
+            el.style.cursor = 'pointer';
+            el.onclick = () => {
+                if (liveMap) liveMap.flyTo([lat, lng], 16, { animate: true, duration: 1 });
+            };
+
+            el.innerHTML = `
+                <div class="alert-icon icon-${issue.severity}">
+                    <ion-icon name="${issue.icon}-outline"></ion-icon>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <span class="alert-title">${issue.type}</span>
+                        <span class="alert-time">${time}</span>
+                    </div>
+                    <p class="alert-desc">${loc.name} \u2022 \ud83d\udd27 ${data.device_id} \u2022 <strong>${Number(data.magnitude).toFixed(2)}g</strong></p>
+                </div>
+            `;
+
+            list.prepend(el);
+            if (list.children.length > 50) list.removeChild(list.lastChild);
+        }
+
+        // Show toast
+        showToast(
+            `\ud83d\udd27 Hardware: ${data.severity.toUpperCase()}`,
+            `${issue.type} \u2014 ${data.device_id} (${Number(data.magnitude).toFixed(2)}g)`
+        );
+    }
+}
+
+function updateHWStatus(connected, deviceId) {
+    hwConnected = connected;
+    const badge = document.getElementById('hw-status');
+    const dot = document.getElementById('hw-dot');
+    const text = document.getElementById('hw-status-text');
+    if (!badge || !dot || !text) return;
+
+    if (connected) {
+        badge.style.background = 'var(--success-bg)';
+        badge.style.color = 'var(--success)';
+        dot.style.background = 'var(--success)';
+        dot.style.animation = 'pulse 2s infinite';
+        text.textContent = deviceId ? `${deviceId} Online` : 'Server Connected';
+    } else {
+        badge.style.background = 'var(--danger-bg)';
+        badge.style.color = 'var(--danger)';
+        dot.style.background = 'var(--danger)';
+        dot.style.animation = 'none';
+        text.textContent = 'Disconnected';
+    }
+}
+
+function updateSensorDisplay(data) {
+    const ax = document.getElementById('sensor-ax');
+    const ay = document.getElementById('sensor-ay');
+    const az = document.getElementById('sensor-az');
+    const mag = document.getElementById('sensor-mag');
+
+    if (ax) ax.textContent = data.accel_x != null ? Number(data.accel_x).toFixed(3) : '--';
+    if (ay) ay.textContent = data.accel_y != null ? Number(data.accel_y).toFixed(3) : '--';
+    if (az) az.textContent = data.accel_z != null ? Number(data.accel_z).toFixed(3) : '--';
+    if (mag) {
+        const m = Number(data.magnitude);
+        mag.textContent = m ? m.toFixed(3) : '--';
+        mag.style.color = m > 3.0 ? 'var(--danger)' : m > 2.0 ? 'var(--warning)' : 'var(--success)';
+    }
+}
+
 // Export CSV
 window.exportCSV = function() {
     let csvContent = "data:text/csv;charset=utf-8,";
@@ -369,7 +576,7 @@ function renderDashboard() {
                         <span class="alert-title">${a.issue.type}</span>
                         <span class="alert-time">${a.time}</span>
                     </div>
-                    <p class="alert-desc">${a.loc.name} • ${a.source.type}: ${a.source.name}</p>
+                    <p class="alert-desc">${a.loc.name} \u2022 ${a.source.type}: ${a.source.name}</p>
                 </div>
             </div>
         `;
@@ -601,7 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Absolute bottom check
                 if ((windowHeight + Math.round(scrollPos)) >= offsetHeight - 20) {
                     navLinks.forEach(a => a.classList.remove('active'));
-                    document.querySelector('.nav-links a[href="#analytics"]').classList.add('active');
+                    document.querySelector('.nav-links a[href="#live-feed"]').classList.add('active');
                 } else if (scrollPos < 100) {
                     // Absolute top check
                     navLinks.forEach(a => a.classList.remove('active'));
@@ -614,4 +821,8 @@ document.addEventListener('DOMContentLoaded', () => {
             isTicking = true;
         }
     });
+
+    // -- Initialize Live Feed map + WebSocket --
+    initLiveMap();
+    connectWebSocket();
 });
