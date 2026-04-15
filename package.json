@@ -1,0 +1,14 @@
+{
+  "name": "road-sense-server",
+  "version": "1.0.0",
+  "description": "Road Sense — Bridge server for ESP32 hardware data to dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  }
+}
