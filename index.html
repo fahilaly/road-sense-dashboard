@@ -46,11 +46,12 @@
             <li><a href="#dashboard" class="active"><ion-icon name="grid-outline"></ion-icon> Dashboard</a></li>
             <li><a href="#reports"><ion-icon name="document-text-outline"></ion-icon> Reports</a></li>
             <li><a href="#analytics"><ion-icon name="pie-chart-outline"></ion-icon> Analytics</a></li>
+            <li><a href="#live-feed"><ion-icon name="hardware-chip-outline"></ion-icon> Live Feed</a></li>
         </ul>
         <div class="sidebar-bottom">
             <div class="weather-widget" style="margin-bottom:1rem;" title="Live Weather Conditions">
                 <ion-icon name="partly-sunny-outline" style="font-size: 1.2rem;"></ion-icon>
-                <span>31°C Riyadh</span>
+                <span>31&deg;C Riyadh</span>
             </div>
             <button class="action-btn w-100" onclick="openReportModal()" style="margin-bottom:1.5rem; justify-content:center; width:100%;"><ion-icon name="add-circle-outline"></ion-icon> New Report</button>
             <div class="user-profile" style="display:flex; align-items:center; gap:0.75rem; padding-top:1.5rem; border-top:1px solid var(--border-color);">
@@ -226,6 +227,59 @@
                 </div>
             </div>
         </section>
+
+        <!-- LIVE HARDWARE FEED -->
+        <section id="live-feed" class="live-feed-section glass-panel mt-6">
+            <div class="card-header border-bottom" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <h2><ion-icon name="hardware-chip-outline" style="vertical-align:-3px; margin-right:4px;"></ion-icon> Live Hardware Feed</h2>
+                    <span class="badge" id="hw-status" style="background: var(--danger-bg); color: var(--danger); margin-bottom:0;">
+                        <span id="hw-dot" style="width:8px; height:8px; border-radius:50%; background:currentColor; display:inline-block; margin-right:4px;"></span>
+                        <span id="hw-status-text">Disconnected</span>
+                    </span>
+                </div>
+                <span style="font-size:0.8rem; color:var(--text-muted);">ESP32-C3 + MPU6050</span>
+            </div>
+
+            <!-- Sensor Readout -->
+            <div id="sensor-live-data" style="display:flex; padding: 1rem 1.5rem; background: var(--bg-color); gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; align-items:center; border-bottom: 1px solid var(--border-color);">
+                <span style="font-weight:700; color:var(--primary); display:inline-flex; align-items:center; gap:6px;"><ion-icon name="pulse-outline" style="font-size:1.2rem;"></ion-icon> Accelerometer</span>
+                <div style="display:flex; gap:1rem; align-items:center;">
+                    <span>X: <strong id="sensor-ax" style="font-family:monospace; min-width:50px; display:inline-block;">--</strong>g</span>
+                    <span>Y: <strong id="sensor-ay" style="font-family:monospace; min-width:50px; display:inline-block;">--</strong>g</span>
+                    <span>Z: <strong id="sensor-az" style="font-family:monospace; min-width:50px; display:inline-block;">--</strong>g</span>
+                </div>
+                <span style="border-left: 2px solid var(--border-color); padding-left: 1rem; font-size:1rem;">
+                    Magnitude: <strong id="sensor-mag" style="font-family:monospace; color:var(--text-muted); font-size:1.1rem;">--</strong> g
+                </span>
+                <span id="live-detection-count" style="margin-left:auto; font-weight:600; color:var(--text-muted);">0 detections</span>
+            </div>
+
+            <!-- Live Feed Grid: Map + Alerts -->
+            <div class="dashboard-grid" style="padding:1.5rem;">
+                <div class="card map-card" style="border:1px solid var(--border-color); border-radius:var(--border-radius-md); overflow:hidden;">
+                    <div class="card-header" style="padding:1rem 1.5rem; background:var(--bg-color); border-bottom:1px solid var(--border-color);">
+                        <h2 style="font-size:1.1rem;"><ion-icon name="map-outline" style="vertical-align:-2px;"></ion-icon> Hardware Detection Map</h2>
+                    </div>
+                    <div id="live-map" class="map-container"></div>
+                </div>
+
+                <div class="card alerts-card" style="border:1px solid var(--border-color); border-radius:var(--border-radius-md); overflow:hidden;">
+                    <div class="card-header" style="padding:1rem 1.5rem; background:var(--bg-color); border-bottom:1px solid var(--border-color);">
+                        <h2 style="font-size:1.1rem;">Hardware Detections <span class="live-indicator"></span></h2>
+                    </div>
+                    <div class="alerts-list" id="live-alerts-list" style="padding:1rem;">
+                        <div style="text-align:center; padding:3rem 1rem; color:var(--text-muted);">
+                            <ion-icon name="hardware-chip-outline" style="font-size:3rem; display:block; margin:0 auto 1rem;"></ion-icon>
+                            <p style="margin:0; font-weight:600;">Waiting for hardware data...</p>
+                            <p style="margin:0.5rem 0 0; font-size:0.85rem;">Connect your ESP32-C3 or use the test endpoint:<br>
+                            <code style="background:var(--bg-color); padding:0.2rem 0.5rem; border-radius:4px; font-size:0.8rem;">http://localhost:3000/api/test-detection</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 </div> <!-- end app-container -->
     
