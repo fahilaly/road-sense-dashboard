@@ -728,9 +728,6 @@ document.addEventListener('DOMContentLoaded', () => {
     for(let i=0; i<18; i++) generateAlert();
     renderReports();
 
-    // Start WebSocket
-    connectWebSocket();
-
     // Simulate Live Updates
     setInterval(() => {
         if(Math.random() > 0.4) generateAlert(); // Randomly generate events
@@ -799,6 +796,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sections.forEach(section => observer.observe(section));
 
-    // Live Feed Map Init
+    // Throttled Scroll Listener using requestAnimationFrame for smoothness
+    let isTicking = false;
+    window.addEventListener('scroll', () => {
+        if (!isTicking) {
+            window.requestAnimationFrame(() => {
+                const scrollPos = window.scrollY;
+                const windowHeight = window.innerHeight;
+                const offsetHeight = document.body.offsetHeight;
+
+                // Absolute bottom check
+                if ((windowHeight + Math.round(scrollPos)) >= offsetHeight - 20) {
+                    navLinks.forEach(a => a.classList.remove('active'));
+                    document.querySelector('.nav-links a[href="#live-feed"]').classList.add('active');
+                } else if (scrollPos < 100) {
+                    // Absolute top check
+                    navLinks.forEach(a => a.classList.remove('active'));
+                    const dashboardLink = document.querySelector('.nav-links a[href="#dashboard"]');
+                    if(dashboardLink) dashboardLink.classList.add('active');
+                }
+                
+                isTicking = false;
+            });
+            isTicking = true;
+        }
+    });
+
+    // ── Initialize Live Feed map + WebSocket ──
     initLiveMap();
+    connectWebSocket();
 });
