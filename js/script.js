@@ -81,7 +81,7 @@ function initMap() {
     map = L.map('map', {
         zoomControl: true,
         scrollWheelZoom: true
-    }).setView([24.7136, 46.6753], 12);
+    }).setView([24.7136, 46.6753], 13);
 
     // Standard OpenStreetMap tiles for clearer, more detailed map
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -325,7 +325,7 @@ function initLiveMap() {
     liveMap = L.map('live-map', {
         zoomControl: true,
         scrollWheelZoom: true
-    }).setView([24.7136, 46.6753], 12);
+    }).setView([24.7136, 46.6753], 13);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
