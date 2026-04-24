@@ -292,13 +292,13 @@ window.openSnapshotModal = function(loc, type, sev, conf) {
     
     const imageSources = {
         'high': [
-            'Potholes%20photos/big_pothole.png'
+            'Potholes%20photos/Big%20pothole.png'
         ],
         'medium': [
-            'Potholes%20photos/mid_pothole.png'
+            'Potholes%20photos/Mid%20pothole.png'
         ],
         'low': [
-            'Potholes%20photos/small_pothole.png'
+            'Potholes%20photos/Small%20pothole.png'
         ]
     };
     const sources = imageSources[sev] || imageSources['low'];
