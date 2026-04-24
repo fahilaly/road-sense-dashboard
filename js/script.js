@@ -1,168 +1,566 @@
 // Mock Data for the demonstration
-const locations = [
-    { name: 'King Fahad Road', lat: 24.7136, lng: 46.6753 },
-    { name: 'Olaya Street', lat: 24.7003, lng: 46.6711 },
-    { name: 'Tahlia Street', lat: 24.6942, lng: 46.6836 },
-    { name: 'Makkah Al Mukarramah Rd', lat: 24.6644, lng: 46.6753 },
-    { name: 'King Abdullah Road', lat: 24.7500, lng: 46.7000 },
-    { name: 'Diplomatic Quarter', lat: 24.6755, lng: 46.6264 },
-    { name: 'Eastern Ring Road', lat: 24.7450, lng: 46.7600 },
-    { name: 'Prince Turki Al Awwal Rd', lat: 24.7215, lng: 46.6345 }
+
+        const locations = [
+    { name: 'King Fahd Rd, Riyadh', lat: 24.711, lng: 46.674 },
+    { name: 'Olaya St. Intersection', lat: 24.694, lng: 46.683 },
+    { name: 'Tahlia Street', lat: 24.696, lng: 46.685 },
+    { name: 'Northern Ring Branch', lat: 24.755, lng: 46.638 },
+    { name: 'Khaleej Bridge', lat: 24.685, lng: 46.726 },
+    { name: 'Dammam Highway', lat: 24.795, lng: 46.812 },
+    { name: 'Diplomatic Quarter', lat: 24.681, lng: 46.623 },
+    { name: 'King Abdullah Rd', lat: 24.735, lng: 46.702 },
+    { name: 'Imam Saud Bin Abdulaziz Rd', lat: 24.746, lng: 46.688 },
+    { name: 'Prince Turki Al Awwal Rd', lat: 24.718, lng: 46.650 },
+    { name: 'Airport Road', lat: 24.814, lng: 46.732 }
 ];
 
 const issueTypes = [
-    { type: 'Deep Pothole', severity: 'high', icon: 'warning-outline' },
-    { type: 'Surface Crack', severity: 'medium', icon: 'git-branch-outline' },
-    { type: 'Uneven Surface', severity: 'low', icon: 'stats-chart-outline' },
-    { type: 'Manhole Cover', severity: 'high', icon: 'alert-circle-outline' }
+    { type: 'Deep Pothole', severity: 'high', icon: 'warning', weight: 10 },
+    { type: 'Surface Crack (Longitudinal)', severity: 'medium', icon: 'git-commit', weight: 30 },
+    { type: 'Uneven Surface / Bump', severity: 'low', icon: 'analytics', weight: 45 },
+    { type: 'Manhole Cover Sunken', severity: 'high', icon: 'alert-circle', weight: 5 },
+    { type: 'Asphalt Degradation', severity: 'medium', icon: 'grid', weight: 10 }
 ];
 
-const imageSources = {
-    high: [
-        'Potholes%20photos/Pothole%201.jpg',
-        'Potholes%20photos/Pothole%202.jpg',
-        'Potholes%20photos/Pothole%203.jpg',
-        'Potholes%20photos/Pothole%204.jpg',
-        'Potholes%20photos/Pothole%205.jpg',
-        'Potholes%20photos/Pothole%206.jpg',
-        'Potholes%20photos/Pothole%207.jpg',
-        'Potholes%20photos/Pothole%208.jpg',
-        'Potholes%20photos/Pothole%209.jpg',
-        'Potholes%20photos/Pothole%2010.jpg'
-    ],
-    medium: [
-        'Potholes%20photos/Pothole%2011.jpg',
-        'Potholes%20photos/Pothole%2012.jpg'
-    ],
-    low: [
-        'Potholes%20photos/Pothole%2013.jpg',
-        'Potholes%20photos/Pothole%2014.jpg'
-    ]
-};
+const reportSources = [
+    { name: 'Bus BT-014', type: 'IoT Sensor' },
+    { name: 'Taxi Fleet #204', type: 'IoT Sensor' },
+    { name: 'Municipal Van #41', type: 'IoT Sensor' },
+    { name: 'Citizen App (Balady)', type: 'Citizen Report' },
+    { name: '940 Call Center', type: 'Citizen Report' },
+    { name: 'Road Service #02', type: 'IoT Sensor' }
+];
 
-let map, heatmapLayer, markerLayer;
-let alerts = [];
-let reports = [];
-let fleetMarkers = [];
+// State
+let map;
+let allMarkers = []; // Leaflet marker objects
+let heatLayer;
+let currentMapLayer = 'markers';
+const fleetMarkers = [];
+let recentAlerts = [];
+let ws = null;
+let hwConnected = false;
+let routeIndex = 0;
+let liveMap = null;
+let liveMarkers = [];
+let liveDetectionCount = 0;
+let pendingReports = [
+    { id: 'RS-9402', loc: locations[0].name, type: issueTypes[0], source: reportSources[0], date: '2 Mins ago' },
+    { id: 'RS-9401', loc: locations[1].name, type: issueTypes[1], source: reportSources[1], date: '15 Mins ago' },
+    { id: 'RS-9400', loc: locations[3].name, type: issueTypes[2], source: reportSources[2], date: '28 Mins ago' },
+    { id: 'RS-9397', loc: 'Prince Turki Rd', type: issueTypes[4], source: reportSources[5], date: '45 Mins ago' },
+    { id: 'RS-9388', loc: locations[2].name, type: issueTypes[3], source: reportSources[3], date: '1 Hour ago' },
+    { id: 'RS-9385', loc: 'Abi Bakr Street', type: issueTypes[1], source: reportSources[4], date: '2 Hours ago' },
+    { id: 'RS-9381', loc: 'Dammam Highway', type: issueTypes[0], source: reportSources[1], date: '3 Hours ago' },
+    { id: 'RS-9372', loc: 'Khurais Road', type: issueTypes[2], source: reportSources[0], date: '5 Hours ago' }
+];
+let handledReports = [
+    { id: 'RS-9250', loc: 'King Abdullah Rd', type: 'Deep Pothole', source: { name: 'Citizen App (Balady)', type: 'Citizen Report' }, date: 'Oct 12, 2023', contractor: 'Riyadh Infra Co.', status: 'Completed' },
+    { id: 'RS-9241', loc: 'Exit 10 Overpass', type: 'Surface Crack', source: { name: 'Municipal Van #14', type: 'IoT Sensor' }, date: 'Oct 10, 2023', contractor: 'City Maintenance', status: 'Completed' },
+    { id: 'RS-9220', loc: 'Northern Ring Road', type: 'Uneven Surface', source: { name: '940 Call Center', type: 'Citizen Report' }, date: 'Oct 05, 2023', contractor: 'Riyadh Infra Co.', status: 'Completed' },
+    { id: 'RS-9188', loc: 'Imam Saud St.', type: 'Manhole Cover Sunken', source: { name: 'Bus AT-099', type: 'IoT Sensor' }, date: 'Oct 02, 2023', contractor: 'City Maintenance', status: 'Completed' },
+    { id: 'RS-9112', loc: 'Olaya St.', type: 'Uneven Surface', source: { name: 'Taxi Fleet #108', type: 'IoT Sensor' }, date: 'Sep 28, 2023', contractor: 'Riyadh Infra Co.', status: 'Completed' },
+];
 
-// Theme Management
-function toggleTheme() {
-    const body = document.body;
-    const icon = document.getElementById('theme-icon');
-    const isDark = body.getAttribute('data-theme') === 'dark';
+function getRandomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getRandomIssue() {
+    const totalWeight = issueTypes.reduce((sum, item) => sum + item.weight, 0);
+    let randomNum = Math.random() * totalWeight;
+    for (const item of issueTypes) {
+        if (randomNum < item.weight) return item;
+        randomNum -= item.weight;
+    }
+    return issueTypes[0];
+}
+
+function initMap() {
+    // Initialize map centered in Riyadh, Saudi Arabia
+    map = L.map('map', {
+        zoomControl: true,
+        scrollWheelZoom: true
+    }).setView([24.7136, 46.6753], 12);
+
+    // Standard OpenStreetMap tiles for clearer, more detailed map
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
     
-    if (isDark) {
-        body.removeAttribute('data-theme');
-        icon.setAttribute('name', 'moon-outline');
-        localStorage.setItem('theme', 'light');
-    } else {
-        body.setAttribute('data-theme', 'dark');
-        icon.setAttribute('name', 'sunny-outline');
-        localStorage.setItem('theme', 'dark');
+    // Initialize Heatmap Layer (empty initially)
+    heatLayer = L.heatLayer([], { radius: 25, blur: 15, maxZoom: 17, gradient: {0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1.0: 'red'} });
+
+    // Init Fleet Markers
+    const fleetIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="background:var(--primary); color:white; width:28px; height:28px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:2px solid white; box-shadow:0 3px 6px rgba(0,0,0,0.4);"><ion-icon name="car-sport"></ion-icon></div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+    });
+    for(let i=0; i<4; i++) {
+        const loc = getRandomItem(locations);
+        const m = L.marker([loc.lat + (Math.random()-0.5)*0.03, loc.lng + (Math.random()-0.5)*0.03], {icon: fleetIcon, zIndexOffset: 1000}).addTo(map);
+        fleetMarkers.push(m);
     }
 }
 
-// Sidebar toggle for mobile
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebar-overlay').classList.toggle('visible');
+// Generate a random alert event
+function generateAlert() {
+    const loc = getRandomItem(locations);
+    const issue = getRandomIssue();
+    const source = getRandomItem(reportSources);
+    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+
+    // Add slight offset to coordinate so they don't exactly overlap
+    const latOffset = (Math.random() - 0.5) * 0.05;
+    const lngOffset = (Math.random() - 0.5) * 0.05;
+    const lat = loc.lat + latOffset;
+    const lng = loc.lng + lngOffset;
+
+    const newAlert = { id: `RS-${Math.floor(Math.random() * 9000) + 1000}`, loc, issue, source, time, lat, lng };
+    
+    // Add to alerts list
+    recentAlerts.unshift(newAlert);
+    
+    if (issue.severity === 'high') {
+        showToast('High Severity Detected', `${issue.type} detected at ${loc.name}. Urgent review recommended.`);
+    }
+    if(recentAlerts.length > 50) recentAlerts.pop();
+
+    // Instead of full dashboard render, just add the new alert to the UI if it matches filter
+    const filter = document.getElementById('severity-filter').value;
+    if (filter === 'all' || issue.severity === filter) {
+        addAlertToUI(newAlert);
+    }
+    
+    // Add Marker to map
+    addMarkerToMap(newAlert);
 }
 
-// Map Initialization
-function initMap() {
-    map = L.map('map', {
-        center: [24.7136, 46.6753],
-        zoom: 13,
-        zoomControl: false
+function addAlertToUI(alert) {
+    const list = document.getElementById('alerts-list');
+    if (!list) return;
+
+    const el = document.createElement('div');
+    el.className = `alert-item border-${alert.issue.severity}`;
+    el.onclick = () => focusOnAlert(alert.lat, alert.lng, alert.loc.name, alert.issue.type, alert.issue.severity);
+
+    el.innerHTML = `
+        <div class="alert-icon icon-${alert.issue.severity}">
+            <ion-icon name="${alert.issue.icon}-outline"></ion-icon>
+        </div>
+        <div class="alert-content">
+            <div class="alert-header">
+                <span class="alert-title">${alert.issue.type}</span>
+                <span class="alert-time">${alert.time}</span>
+            </div>
+            <p class="alert-desc">${alert.loc.name} • ${alert.source.type}: ${alert.source.name}</p>
+        </div>
+    `;
+    
+    // Prepend and maintain a limit for maximum elements for better performance
+    list.prepend(el);
+    if (list.children.length > 50) {
+        list.removeChild(list.lastChild);
+    }
+}
+
+function addMarkerToMap(alert) {
+    // Create Custom HTML Marker Icon
+    const customIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div class="marker-pin ${alert.issue.severity}"><ion-icon class="marker-icon" name="${alert.issue.icon}-outline"></ion-icon></div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+        popupAnchor: [0, -35]
     });
 
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-    // Modern styled tiles (Voyager)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO'
-    }).addTo(map);
-
-    markerLayer = L.layerGroup().addTo(map);
-    heatmapLayer = L.heatLayer([], { radius: 25, blur: 15, maxZoom: 17 }).addTo(map);
-
-    // Initial Fleet Simulation
-    for(let i=0; i<5; i++) {
-        const loc = locations[Math.floor(Math.random() * locations.length)];
-        const marker = L.circleMarker([loc.lat + (Math.random()-0.5)*0.01, loc.lng + (Math.random()-0.5)*0.01], {
-            radius: 6,
-            fillColor: "#2563eb",
-            color: "#fff",
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.8
-        }).addTo(map);
-        marker.bindTooltip(`Fleet Unit RS-0${i+1} (Online)`, { permanent: false, direction: 'top' });
-        fleetMarkers.push(marker);
-    }
-}
-
-function toggleMapLayer(type) {
-    const btnMarkers = document.getElementById('btn-markers');
-    const btnHeatmap = document.getElementById('btn-heatmap');
-
-    if (type === 'markers') {
-        if (!map.hasLayer(markerLayer)) {
-            map.addLayer(markerLayer);
-            btnMarkers.classList.add('active');
-            btnMarkers.style.background = 'var(--primary)';
-            btnMarkers.style.color = 'white';
-        } else {
-            map.removeLayer(markerLayer);
-            btnMarkers.classList.remove('active');
-            btnMarkers.style.background = 'var(--bg-color)';
-            btnMarkers.style.color = 'var(--text-secondary)';
-        }
-    } else {
-        if (!map.hasLayer(heatmapLayer)) {
-            map.addLayer(heatmapLayer);
-            btnHeatmap.classList.add('active');
-            btnHeatmap.style.background = 'var(--primary)';
-            btnHeatmap.style.color = 'white';
-        } else {
-            map.removeLayer(heatmapLayer);
-            btnHeatmap.classList.remove('active');
-            btnHeatmap.style.background = 'var(--bg-color)';
-            btnHeatmap.style.color = 'var(--text-secondary)';
-        }
-    }
-}
-
-function generateAlert() {
-    const loc = locations[Math.floor(Math.random() * locations.length)];
-    const issue = issueTypes[Math.floor(Math.random() * issueTypes.length)];
-    const id = Math.floor(1000 + Math.random() * 9000);
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const popupContent = `<b>${alert.issue.type}</b><br>${alert.loc.name}<br>Severity: ${alert.issue.severity.toUpperCase()}<br>
+        <button class="action-btn" style="margin-top:0.5rem; padding:0.2rem 0.5rem; font-size:0.75rem;" 
+        onclick="openSnapshotModal('${alert.loc.name}', '${alert.issue.type}', '${alert.issue.severity}', ${Math.floor(Math.random()*15 + 80)})">View Snapshot</button>`;
+        
+    const marker = L.marker([alert.lat, alert.lng], { icon: customIcon });
+    if (currentMapLayer === 'markers') marker.addTo(map);
+    marker.bindPopup(popupContent);
     
-    const alert = {
-        id, loc, issue, time,
-        lat: loc.lat + (Math.random() - 0.5) * 0.02,
-        lng: loc.lng + (Math.random() - 0.5) * 0.02
+    marker.severity = alert.issue.severity;
+    allMarkers.push(marker);
+}
+
+function focusOnAlert(lat, lng, locName, type, sev) {
+    if(map) {
+        map.flyTo([lat, lng], 15, { animate: true, duration: 1.5 });
+        // Wait for pan then open evidence
+        setTimeout(() => { openSnapshotModal(locName, type, sev, Math.floor(Math.random()*15 + 85)); }, 1200);
+    }
+}
+
+window.updateReportStatus = function(selectEl) {
+    const row = selectEl.closest('tr');
+    const badge = row.querySelector('.status-badge');
+    if (selectEl.value !== 'Unassigned') {
+        badge.className = 'status-badge badge badge-warning';
+        badge.innerHTML = '<ion-icon name="time-outline"></ion-icon> Assigned';
+    } else {
+        badge.className = 'status-badge badge';
+        badge.innerHTML = 'Pending';
+    }
+};
+
+// Mobile Sidebar Toggle
+window.toggleSidebar = function() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('visible');
+};
+
+// Modals
+window.openReportModal = function() { document.getElementById('report-modal').classList.add('visible'); };
+window.closeReportModal = function() { document.getElementById('report-modal').classList.remove('visible'); };
+window.submitReport = function() {
+    const locName = document.getElementById('report-loc').value || 'Unknown Citizen Location';
+    const typeStr = document.getElementById('report-type').value;
+    const issue = issueTypes.find(i => i.type === typeStr) || issueTypes[0];
+    
+    const newReport = {
+        id: `RS-${Math.floor(Math.random() * 9000) + 1000}`,
+        loc: locName,
+        type: issue,
+        source: { name: 'Citizen App (Balady)', type: 'Citizen Report' },
+        date: 'Just now'
+    };
+    pendingReports.unshift(newReport);
+    renderReports();
+    closeReportModal();
+    document.getElementById('report-loc').value = '';
+};
+
+// Filter Logic
+let currentFilter = 'all';
+window.filterReports = function(sev) {
+    currentFilter = sev;
+    renderReports();
+};
+
+// Theme Toggle
+window.toggleTheme = function() {
+    document.documentElement.classList.toggle('dark-theme');
+    const icon = document.querySelector('#theme-icon');
+    if(document.documentElement.classList.contains('dark-theme')) {
+        icon.setAttribute('name', 'sunny-outline');
+    } else {
+        icon.setAttribute('name', 'moon-outline');
+    }
+};
+
+// Heatmap Toggle
+window.toggleMapLayer = function(layer) {
+    currentMapLayer = layer;
+    document.getElementById('btn-markers').classList.toggle('active', layer === 'markers');
+    document.getElementById('btn-markers').style.background = layer === 'markers' ? 'var(--primary)' : 'var(--bg-color)';
+    document.getElementById('btn-markers').style.color = layer === 'markers' ? 'white' : 'var(--text-secondary)';
+    
+    document.getElementById('btn-heatmap').classList.toggle('active', layer === 'heatmap');
+    document.getElementById('btn-heatmap').style.background = layer === 'heatmap' ? 'var(--primary)' : 'var(--bg-color)';
+    document.getElementById('btn-heatmap').style.color = layer === 'heatmap' ? 'white' : 'var(--text-secondary)';
+    
+    renderDashboard();
+};
+
+// Toast Notification logic
+function showToast(title, message) {
+    const container = document.getElementById('toast-container');
+    if(!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<ion-icon name="warning" style="color:var(--danger); font-size:1.5rem; flex-shrink:0;"></ion-icon>
+                       <div><strong style="color:var(--text-primary)">${title}</strong><br><span style="font-size:0.85rem; color:var(--text-secondary);">${message}</span></div>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('hide'), 4000);
+    setTimeout(() => toast.remove(), 4300);
+}
+
+// Snapshot Evidence logic
+window.openSnapshotModal = function(loc, type, sev, conf) {
+    document.getElementById('snap-loc').innerText = loc;
+    document.getElementById('snap-issue').innerText = type;
+    document.getElementById('snap-issue').className = `badge badge-${sev === 'high' ? 'danger' : sev === 'medium' ? 'warning' : 'success'}`;
+    document.getElementById('snap-conf').innerText = `${conf}%`;
+    
+    const imageSources = {
+        'high': [
+            'Potholes%20photos/big_pothole.png'
+        ],
+        'medium': [
+            'Potholes%20photos/mid_pothole.png'
+        ],
+        'low': [
+            'Potholes%20photos/small_pothole.png'
+        ]
+    };
+    const sources = imageSources[sev] || imageSources['low'];
+    document.getElementById('snapshot-img').src = sources[Math.floor(Math.random() * sources.length)];
+    
+    const bbox = document.getElementById('snapshot-bbox');
+    bbox.style.top = (25 + Math.random() * 20) + '%';
+    bbox.style.left = (30 + Math.random() * 25) + '%';
+    bbox.style.width = (20 + Math.random() * 15) + '%';
+    bbox.style.height = (25 + Math.random() * 20) + '%';
+    
+    document.getElementById('snapshot-modal').classList.add('visible');
+};
+window.closeSnapshotModal = function() { document.getElementById('snapshot-modal').classList.remove('visible'); };
+
+// ═══════════════════════════════════════════════════
+//  REAL HARDWARE DATA INTEGRATION (Live Feed Tab)
+//  Completely separate from the mock demo dashboard
+// ═══════════════════════════════════════════════════
+
+function initLiveMap() {
+    if (!document.getElementById('live-map')) return;
+
+    liveMap = L.map('live-map', {
+        zoomControl: true,
+        scrollWheelZoom: true
+    }).setView([24.7136, 46.6753], 12);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(liveMap);
+
+    // Fix map rendering when section scrolls into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) liveMap.invalidateSize();
+        });
+    });
+    observer.observe(document.getElementById('live-feed'));
+}
+
+function connectWebSocket() {
+    // Only connect if served from a web server (not file://)
+    if (window.location.protocol === 'file:') {
+        console.log('[HW] Running from file:// — WebSocket disabled.');
+        console.log('[HW] Run the Node.js server: npm start');
+        console.log('[HW] Then open: http://localhost:3000');
+        return;
+    }
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}`;
+
+    console.log(`[HW] Connecting to ${wsUrl}...`);
+    ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+        console.log('[HW] ✅ Connected to Road Sense server');
+        updateHWStatus(true);
     };
 
-    alerts.unshift(alert);
-    if (alerts.length > 20) alerts.pop();
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            handleRealSensorData(data);
+        } catch (e) {
+            console.error('[HW] Parse error:', e);
+        }
+    };
 
-    renderDashboard();
+    ws.onclose = () => {
+        console.log('[HW] Disconnected. Reconnecting in 3s...');
+        updateHWStatus(false);
+        setTimeout(connectWebSocket, 3000);
+    };
+
+    ws.onerror = () => {
+        ws.close();
+    };
 }
 
+function handleRealSensorData(data) {
+    // Always update sensor readout panel
+    updateSensorDisplay(data);
+
+    if (data.type === 'heartbeat') {
+        updateHWStatus(true, data.device_id);
+        return;
+    }
+
+    if (data.type === 'detection') {
+        updateHWStatus(true, data.device_id);
+
+        // Increment counter
+        liveDetectionCount++;
+        const countEl = document.getElementById('live-detection-count');
+        if (countEl) countEl.textContent = `${liveDetectionCount} detection${liveDetectionCount !== 1 ? 's' : ''}`;
+
+        // Pick a Riyadh location (cycling through since no GPS)
+        const loc = locations[routeIndex % locations.length];
+        routeIndex++;
+
+        const latOffset = (Math.random() - 0.5) * 0.015;
+        const lngOffset = (Math.random() - 0.5) * 0.015;
+        const lat = loc.lat + latOffset;
+        const lng = loc.lng + lngOffset;
+
+        // Map severity to issue types
+        const issueMap = {
+            'high':   issueTypes[0],  // Deep Pothole
+            'medium': issueTypes[1],  // Surface Crack
+            'low':    issueTypes[2]   // Uneven Surface / Bump
+        };
+        const issue = issueMap[data.severity] || issueTypes[2];
+
+        const time = new Date().toLocaleTimeString([], {
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+
+        // ── Add marker to LIVE map only ──
+        if (liveMap) {
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="marker-pin ${issue.severity}"><ion-icon class="marker-icon" name="${issue.icon}-outline"></ion-icon></div>`,
+                iconSize: [30, 42],
+                iconAnchor: [15, 42],
+                popupAnchor: [0, -35]
+            });
+
+            const popupContent = `<b>🔧 ${issue.type}</b><br>${loc.name}<br>Severity: ${data.severity.toUpperCase()}<br>Magnitude: ${Number(data.magnitude).toFixed(2)}g<br><small>Source: ${data.device_id}</small>`;
+
+            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(liveMap);
+            marker.bindPopup(popupContent);
+            liveMarkers.push(marker);
+
+            // Pan to newest detection
+            liveMap.flyTo([lat, lng], 14, { animate: true, duration: 1 });
+        }
+
+        // ── Add alert to LIVE alerts list only ──
+        const list = document.getElementById('live-alerts-list');
+        if (list) {
+            // Remove the placeholder if it's the first detection
+            if (liveDetectionCount === 1) list.innerHTML = '';
+
+            const el = document.createElement('div');
+            el.className = `alert-item border-${issue.severity}`;
+            el.style.cursor = 'pointer';
+            el.onclick = () => {
+                if (liveMap) liveMap.flyTo([lat, lng], 16, { animate: true, duration: 1 });
+            };
+
+            el.innerHTML = `
+                <div class="alert-icon icon-${issue.severity}">
+                    <ion-icon name="${issue.icon}-outline"></ion-icon>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <span class="alert-title">${issue.type}</span>
+                        <span class="alert-time">${time}</span>
+                    </div>
+                    <p class="alert-desc">${loc.name} • 🔧 ${data.device_id} • <strong>${Number(data.magnitude).toFixed(2)}g</strong></p>
+                </div>
+            `;
+
+            list.prepend(el);
+            if (list.children.length > 50) list.removeChild(list.lastChild);
+        }
+
+        // Show toast
+        showToast(
+            `🔧 Hardware: ${data.severity.toUpperCase()}`,
+            `${issue.type} — ${data.device_id} (${Number(data.magnitude).toFixed(2)}g)`
+        );
+    }
+}
+
+function updateHWStatus(connected, deviceId) {
+    hwConnected = connected;
+    const badge = document.getElementById('hw-status');
+    const dot = document.getElementById('hw-dot');
+    const text = document.getElementById('hw-status-text');
+    if (!badge || !dot || !text) return;
+
+    if (connected) {
+        badge.style.background = 'var(--success-bg)';
+        badge.style.color = 'var(--success)';
+        dot.style.background = 'var(--success)';
+        dot.style.animation = 'pulse 2s infinite';
+        text.textContent = deviceId ? `${deviceId} Online` : 'Server Connected';
+    } else {
+        badge.style.background = 'var(--danger-bg)';
+        badge.style.color = 'var(--danger)';
+        dot.style.background = 'var(--danger)';
+        dot.style.animation = 'none';
+        text.textContent = 'Disconnected';
+    }
+}
+
+function updateSensorDisplay(data) {
+    const ax = document.getElementById('sensor-ax');
+    const ay = document.getElementById('sensor-ay');
+    const az = document.getElementById('sensor-az');
+    const mag = document.getElementById('sensor-mag');
+
+    if (ax) ax.textContent = data.accel_x != null ? Number(data.accel_x).toFixed(3) : '--';
+    if (ay) ay.textContent = data.accel_y != null ? Number(data.accel_y).toFixed(3) : '--';
+    if (az) az.textContent = data.accel_z != null ? Number(data.accel_z).toFixed(3) : '--';
+    if (mag) {
+        const m = Number(data.magnitude);
+        mag.textContent = m ? m.toFixed(3) : '--';
+        mag.style.color = m > 3.0 ? 'var(--danger)' : m > 2.0 ? 'var(--warning)' : 'var(--success)';
+    }
+}
+
+// Export CSV
+window.exportCSV = function() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Report ID,Location,Issue Type,Severity,Source,Date\n";
+    pendingReports.forEach(r => {
+        csvContent += `${r.id},"${r.loc}","${r.type.type}",${r.type.severity},"${r.source.name}",${r.date}\n`;
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "road_sense_reports.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
 function renderDashboard() {
+    // Filter logic for map
     const filter = document.getElementById('severity-filter').value;
-    const listContainer = document.getElementById('alerts-list');
     
-    // Clear Map
-    markerLayer.clearLayers();
-    const heatmapData = [];
+    if (map && allMarkers.length > 0) {
+        if (currentMapLayer === 'heatmap') {
+            // Update heatmap data
+            const heatPoints = recentAlerts
+                .filter(a => filter === 'all' || a.issue.severity === filter)
+                .map(a => [a.lat, a.lng, a.issue.weight * 0.1]); // intensity
+            heatLayer.setLatLngs(heatPoints);
+            if (!map.hasLayer(heatLayer)) map.addLayer(heatLayer);
+            allMarkers.forEach(m => map.removeLayer(m));
+        } else {
+            if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+            allMarkers.forEach(marker => {
+                if(filter === 'all' || marker.severity === filter) {
+                    if(!map.hasLayer(marker)) map.addLayer(marker);
+                } else {
+                    if(map.hasLayer(marker)) map.removeLayer(marker);
+                }
+            });
+        }
+    }
 
-    // Filtered alerts
-    const recentAlerts = alerts.slice(0, 8);
+    // Render Alerts List
+    const list = document.getElementById('alerts-list');
+    if (!list) return;
+
     let listHtml = '';
-
     recentAlerts.forEach((a) => {
         // Only show if it matches filter
         if (filter !== 'all' && a.issue.severity !== filter) return;
@@ -170,200 +568,68 @@ function renderDashboard() {
         listHtml += `
             <div class="alert-item border-${a.issue.severity}" 
                  onclick="focusOnAlert(${a.lat}, ${a.lng}, '${a.loc.name.replace(/'/g, "\\'")}', '${a.issue.type.replace(/'/g, "\\'")}', '${a.issue.severity}')">
-                <div class="alert-icon"><ion-icon name="${a.issue.icon}"></ion-icon></div>
-                <div class="alert-info">
-                    <h4>${a.issue.type} detected</h4>
-                    <p>${a.loc.name} • ${a.time}</p>
+                <div class="alert-icon icon-${a.issue.severity}">
+                    <ion-icon name="${a.issue.icon}-outline"></ion-icon>
                 </div>
-                <span class="badge badge-${a.issue.severity === 'high' ? 'danger' : a.issue.severity === 'medium' ? 'warning' : 'success'}">${a.issue.severity}</span>
+                <div class="alert-content">
+                    <div class="alert-header">
+                        <span class="alert-title">${a.issue.type}</span>
+                        <span class="alert-time">${a.time}</span>
+                    </div>
+                    <p class="alert-desc">${a.loc.name} • ${a.source.type}: ${a.source.name}</p>
+                </div>
             </div>
         `;
     });
-
-    // Add all filtered markers to map
-    alerts.forEach(a => {
-        if (filter !== 'all' && a.issue.severity !== filter) return;
-        
-        const color = a.issue.severity === 'high' ? '#ef4444' : a.issue.severity === 'medium' ? '#f59e0b' : '#2563eb';
-        
-        const m = L.circleMarker([a.lat, a.lng], {
-            radius: 8,
-            fillColor: color,
-            color: '#fff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.8
-        }).addTo(markerLayer);
-
-        // Map Popups Enhancement
-        m.bindPopup(`
-            <div style="font-family:'Inter', sans-serif; padding:5px;">
-                <h4 style="margin:0 0 5px 0; color:${color};">${a.issue.type}</h4>
-                <p style="margin:0 0 10px 0; font-size:12px; color:#64748b;">${a.loc.name}<br>Detected at ${a.time}</p>
-                <button class="action-btn" style="width:100%; font-size:11px; padding:4px;" onclick="openSnapshotModal('${a.loc.name.replace(/'/g, "\\'")}', '${a.issue.type.replace(/'/g, "\\'")}', '${a.issue.severity}', ${a.id})">View Evidence</button>
-            </div>
-        `);
-
-        heatmapData.push([a.lat, a.lng, a.issue.severity === 'high' ? 1.0 : 0.5]);
-    });
-
-    heatmapLayer.setLatLngs(heatmapData);
-    listContainer.innerHTML = listHtml || '<p style="text-align:center; padding:2rem; color:var(--text-muted);">No detections matching filter</p>';
-}
-
-function focusOnAlert(lat, lng, locName, type, severity) {
-    map.flyTo([lat, lng], 15, { duration: 1.5 });
-    // Find the marker and open its popup
-    markerLayer.eachLayer(layer => {
-        if (layer.getLatLng().lat === lat && layer.getLatLng().lng === lng) {
-            layer.openPopup();
-        }
-    });
-}
-
-function openSnapshotModal(loc, type, severity, id) {
-    const modal = document.getElementById('snapshot-modal');
-    const img = document.getElementById('snapshot-img');
-    const locSpan = document.getElementById('snap-loc');
-    const issueSpan = document.getElementById('snap-issue');
-    const bbox = document.getElementById('snapshot-bbox');
-
-    // Get random image from severity category
-    const sources = imageSources[severity] || imageSources.low;
-    const randomImg = sources[Math.floor(Math.random() * sources.length)];
-    
-    img.src = randomImg;
-    locSpan.innerText = loc;
-    issueSpan.innerText = type;
-    issueSpan.className = `badge badge-${severity === 'high' ? 'danger' : severity === 'medium' ? 'warning' : 'success'}`;
-    
-    // Randomize bbox position for realism
-    const top = 30 + Math.random() * 40;
-    const left = 20 + Math.random() * 50;
-    bbox.style.top = top + '%';
-    bbox.style.left = left + '%';
-    bbox.style.width = (15 + Math.random() * 15) + '%';
-    bbox.style.height = (10 + Math.random() * 15) + '%';
-
-    modal.classList.add('visible');
-}
-
-function closeSnapshotModal() {
-    document.getElementById('snapshot-modal').classList.remove('visible');
-}
-
-// Report System
-function openReportModal() {
-    document.getElementById('report-modal').classList.add('visible');
-}
-
-function closeReportModal() {
-    document.getElementById('report-modal').classList.remove('visible');
-}
-
-function submitReport() {
-    const loc = document.getElementById('report-loc').value;
-    const type = document.getElementById('report-type').value;
-
-    if (!loc) {
-        showToast("Please enter a location", "warning");
-        return;
-    }
-
-    const newReport = {
-        id: 'R-' + Math.floor(1000 + Math.random() * 9000),
-        loc,
-        type,
-        source: 'Citizen App',
-        date: new Date().toLocaleDateString(),
-        assignee: 'Unassigned',
-        status: 'Pending'
-    };
-
-    reports.unshift(newReport);
-    renderReports();
-    closeReportModal();
-    showToast("Report submitted successfully!", "success");
-    
-    // Also add to map temporarily as a citizen report
-    const citizenMarker = L.circleMarker([24.7136 + (Math.random()-0.5)*0.05, 46.6753 + (Math.random()-0.5)*0.05], {
-        radius: 10,
-        fillColor: "#6366f1",
-        color: "#fff",
-        weight: 3,
-        opacity: 1,
-        fillOpacity: 0.9
-    }).addTo(markerLayer);
-    citizenMarker.bindPopup(`<b>Citizen Report:</b> ${type}<br>${loc}`);
-}
-
-function showToast(msg, type) {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type === 'success' ? 'border-low' : 'border-high'}`;
-    toast.innerHTML = `
-        <ion-icon name="${type === 'success' ? 'checkmark-circle' : 'alert-circle'}" style="font-size:1.5rem; color:${type === 'success' ? 'var(--success)' : 'var(--danger)'}"></ion-icon>
-        <div>
-            <p style="margin:0; font-weight:600; font-size:0.9rem;">${msg}</p>
-        </div>
-    `;
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    list.innerHTML = listHtml;
 }
 
 function renderReports() {
+    // Pending
     const pendingBody = document.getElementById('pending-tbody');
-    const handledBody = document.getElementById('handled-tbody');
+    pendingBody.innerHTML = '';
     
-    // Initial data if empty
-    if(reports.length === 0) {
-        reports = [
-            { id: 'R-4821', loc: 'King Fahad / Tahlia', type: 'Deep Pothole', source: 'Fleet RS-02', date: '2024-03-20', assignee: 'Eng. Ahmed', status: 'Pending' },
-            { id: 'R-4819', loc: 'Olaya St North', type: 'Surface Crack', source: 'Citizen App', date: '2024-03-19', assignee: 'Unassigned', status: 'Pending' },
-            { id: 'R-4790', loc: 'Airport Rd Exit 5', type: 'Uneven Surface', source: 'Fleet RS-04', date: '2024-03-18', assignee: 'Eng. Sarah', status: 'Pending' }
-        ];
+    const filteredPending = pendingReports.filter(r => currentFilter === 'all' || r.type.severity === currentFilter);
+    
+    if (filteredPending.length === 0) {
+        pendingBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No pending reports match the selected filter.</td></tr>`;
+    } else {
+        let htmlContent = '';
+        filteredPending.forEach(r => {
+            htmlContent += `
+                <tr>
+                    <td><strong>${r.id}</strong></td>
+                    <td>${r.loc}</td>
+                    <td><span class="badge badge-${r.type.severity === 'high' ? 'danger' : (r.type.severity === 'medium' ? 'warning' : 'success')}">${r.type.type}</span></td>
+                    <td><span style="font-size: 0.8rem; font-weight: 500; color: ${r.source.type === 'IoT Sensor' ? 'var(--primary)' : 'var(--warning)'};"><ion-icon name="${r.source.type === 'IoT Sensor' ? 'hardware-chip-outline' : 'people-outline'}"></ion-icon> ${r.source.name}</span></td>
+                    <td style="color:var(--text-secondary); font-size: 0.9rem;">${r.date}</td>
+                    <td>
+                        <select class="assignee-select" onchange="updateReportStatus(this)">
+                            <option value="Unassigned">Unassigned</option>
+                            <option value="Riyadh Infra Co.">Riyadh Infra Co.</option>
+                            <option value="City Maintenance">City Maintenance</option>
+                            <option value="Fast Paving Ltd">Fast Paving Ltd</option>
+                        </select>
+                    </td>
+                    <td><span class="status-badge badge" style="margin:0;">Pending</span></td>
+                    <td><button class="action-btn" style="background:var(--surface-solid); color:var(--text-secondary); border:1px solid var(--border-color); padding:0.4rem;" title="View Details" onclick="openSnapshotModal('${r.loc}', '${r.type.type}', '${r.type.severity}', ${Math.floor(Math.random()*15 + 80)})"><ion-icon name="eye-outline" style="font-size:1.2rem; margin:0;"></ion-icon></button></td>
+                </tr>
+            `;
+        });
+        pendingBody.innerHTML = htmlContent;
     }
 
-    const handledReports = [
-        { id: 'R-4501', loc: 'Exit 10 / Ring Rd', type: 'Deep Pothole', source: {name: 'Fleet RS-01'}, date: '2024-03-15', contractor: 'Al-Rashid Const.', status: 'Repaired' },
-        { id: 'R-4482', loc: 'Makkah Rd Tunnel', type: 'Surface Crack', source: {name: 'Citizen App'}, date: '2024-03-12', contractor: 'City Maintenance', status: 'Repaired' }
-    ];
-
-    let pendingHtml = '';
-    reports.forEach(r => {
-        const severity = r.type.includes('Pothole') ? 'high' : r.type.includes('Crack') ? 'medium' : 'low';
-        pendingHtml += `
-            <tr>
-                <td><strong>#${r.id}</strong></td>
-                <td>${r.loc}</td>
-                <td><span class="badge badge-${severity === 'high' ? 'danger' : severity === 'medium' ? 'warning' : 'success'}">${r.type}</span></td>
-                <td>${r.source}</td>
-                <td>${r.date}</td>
-                <td>
-                    <select class="assignee-select">
-                        <option ${r.assignee === 'Unassigned' ? 'selected' : ''}>Unassigned</option>
-                        <option ${r.assignee === 'Eng. Ahmed' ? 'selected' : ''}>Eng. Ahmed</option>
-                        <option ${r.assignee === 'Eng. Sarah' ? 'selected' : ''}>Eng. Sarah</option>
-                    </select>
-                </td>
-                <td><span class="badge" style="background:var(--bg-color); color:var(--text-secondary);">${r.status}</span></td>
-                <td><button class="action-btn" onclick="openSnapshotModal('${r.loc.replace(/'/g, "\\'")}', '${r.type.replace(/'/g, "\\'")}', '${severity}', 0)">View</button></td>
-            </tr>
-        `;
-    });
-    pendingBody.innerHTML = pendingHtml;
-
+    // Handled
+    const handledBody = document.getElementById('handled-tbody');
+    handledBody.innerHTML = '';
     let handledHtml = '';
     handledReports.forEach(r => {
         handledHtml += `
             <tr>
-                <td><strong>#${r.id}</strong></td>
+                <td><strong>${r.id}</strong></td>
                 <td>${r.loc}</td>
                 <td>${r.type}</td>
+                <td><span style="font-size: 0.8rem; font-weight: 500; color: ${r.source.type === 'IoT Sensor' ? 'var(--primary)' : 'var(--warning)'};"><ion-icon name="${r.source.type === 'IoT Sensor' ? 'hardware-chip-outline' : 'people-outline'}"></ion-icon> ${r.source.type}</span></td>
                 <td>${r.source.name}</td>
                 <td>${r.date}</td>
                 <td>${r.contractor}</td>
@@ -462,6 +728,9 @@ document.addEventListener('DOMContentLoaded', () => {
     for(let i=0; i<18; i++) generateAlert();
     renderReports();
 
+    // Start WebSocket
+    connectWebSocket();
+
     // Simulate Live Updates
     setInterval(() => {
         if(Math.random() > 0.4) generateAlert(); // Randomly generate events
@@ -530,135 +799,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sections.forEach(section => observer.observe(section));
 
-    // Throttled Scroll Listener using requestAnimationFrame for smoothness
-    let isTicking = false;
-    window.addEventListener('scroll', () => {
-        if (!isTicking) {
-            window.requestAnimationFrame(() => {
-                const scrollPos = window.scrollY;
-                const windowHeight = window.innerHeight;
-                const offsetHeight = document.body.offsetHeight;
-
-                // Absolute bottom check
-                if ((windowHeight + Math.round(scrollPos)) >= offsetHeight - 20) {
-                    navLinks.forEach(a => a.classList.remove('active'));
-                    document.querySelector('.nav-links a[href="#live-feed"]').classList.add('active');
-                } else if (scrollPos < 100) {
-                    // Absolute top check
-                    navLinks.forEach(a => a.classList.remove('active'));
-                    const dashboardLink = document.querySelector('.nav-links a[href="#dashboard"]');
-                    if(dashboardLink) dashboardLink.classList.add('active');
-                }
-                
-                isTicking = false;
-            });
-            isTicking = true;
-        }
-    });
-
-    // 🚀🚀 Initialize Live Feed map + WebSocket 🚀🚀
+    // Live Feed Map Init
     initLiveMap();
-    connectWebSocket();
 });
-
-// ═══ LIVE HARDWARE FEED LOGIC (WebSocket) ═══
-let liveMap, liveMarkerLayer;
-let ws;
-let detectionCount = 0;
-
-function initLiveMap() {
-    liveMap = L.map('live-map', {
-        center: [24.7136, 46.6753],
-        zoom: 14,
-        zoomControl: false
-    });
-
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(liveMap);
-    liveMarkerLayer = L.layerGroup().addTo(liveMap);
-    
-    // Add a pulsing blue dot for "Current Fleet Position"
-    const fleetPos = L.circleMarker([24.7136, 46.6753], {
-        radius: 8, fillColor: '#2563eb', color: '#fff', weight: 3, opacity: 1, fillOpacity: 0.8
-    }).addTo(liveMap);
-    fleetPos.bindTooltip("Your Hardware Unit (RS-LIVE)", { permanent: true, direction: 'right' });
-}
-
-function connectWebSocket() {
-    const statusText = document.getElementById('hw-status-text');
-    const statusDot = document.getElementById('hw-dot');
-    const statusBadge = document.getElementById('hw-status');
-
-    // Try to connect to local server
-    ws = new WebSocket('ws://localhost:3000');
-
-    ws.onopen = () => {
-        statusText.innerText = "Connected (Live)";
-        statusBadge.style.background = "#dcfce7";
-        statusBadge.style.color = "#10b981";
-        showToast("Hardware connection established", "success");
-    };
-
-    ws.onclose = () => {
-        statusText.innerText = "Disconnected";
-        statusBadge.style.background = "var(--danger-bg)";
-        statusBadge.style.color = "var(--danger)";
-        // Attempt reconnect after 5s
-        setTimeout(connectWebSocket, 5000);
-    };
-
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'telemetry') {
-            updateTelemetry(data.data);
-        } else if (data.type === 'detection') {
-            handleLiveDetection(data.data);
-        }
-    };
-}
-
-function updateTelemetry(data) {
-    document.getElementById('sensor-ax').innerText = data.ax.toFixed(3);
-    document.getElementById('sensor-ay').innerText = data.ay.toFixed(3);
-    document.getElementById('sensor-az').innerText = data.az.toFixed(3);
-    document.getElementById('sensor-mag').innerText = data.mag.toFixed(3);
-    
-    // Optional: Subtle vibration effect on dashboard if magnitude is high
-    if (data.mag > 1.5) {
-        document.body.style.transform = `translate(${(Math.random()-0.5)*2}px, ${(Math.random()-0.5)*2}px)`;
-        setTimeout(() => document.body.style.transform = 'none', 50);
-    }
-}
-
-function handleLiveDetection(data) {
-    detectionCount++;
-    document.getElementById('live-detection-count').innerText = `${detectionCount} detections`;
-    
-    // Add to list
-    const list = document.getElementById('live-alerts-list');
-    // Remove "waiting" message if first detection
-    if (detectionCount === 1) list.innerHTML = '';
-
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    
-    const item = document.createElement('div');
-    item.className = 'alert-item border-high fade-in';
-    item.innerHTML = `
-        <div class="alert-icon"><ion-icon name="warning-outline"></ion-icon></div>
-        <div class="alert-info">
-            <h4>Pothole Detected (Live)</h4>
-            <p>Magnitude: ${data.mag.toFixed(2)}g • ${time}</p>
-        </div>
-        <span class="badge badge-danger">CRITICAL</span>
-    `;
-    list.prepend(item);
-
-    // Add to map
-    const m = L.circleMarker([24.7136 + (Math.random()-0.5)*0.01, 46.6753 + (Math.random()-0.5)*0.01], {
-        radius: 12, fillColor: '#ef4444', color: '#fff', weight: 3, opacity: 1, fillOpacity: 0.9
-    }).addTo(liveMarkerLayer);
-    
-    m.bindPopup(`<b>Live Detection</b><br>Magnitude: ${data.mag.toFixed(2)}g<br>Time: ${time}`).openPopup();
-    
-    showToast("CRITICAL: Road defect detected by hardware!", "danger");
-}
