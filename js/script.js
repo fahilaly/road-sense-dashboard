@@ -551,4 +551,264 @@ function renderDashboard() {
                     if(!map.hasLayer(marker)) map.addLayer(marker);
                 } else {
                     if(map.hasLayer(marker)) map.removeLayer(marker);
-                }\n            });\n        }\n    }\n\n    // Render Alerts List\n    const list = document.getElementById('alerts-list');\n    if (!list) return;\n\n    let listHtml = '';\n    recentAlerts.forEach((a) => {\n        // Only show if it matches filter\n        if (filter !== 'all' && a.issue.severity !== filter) return;\n\n        listHtml += `\n            <div class=\"alert-item border-${a.issue.severity}\" \n                 onclick=\"focusOnAlert(${a.lat}, ${a.lng}, '${a.loc.name.replace(/'/g, \"\\\\'\")}', '${a.issue.type.replace(/'/g, \"\\\\'\")}', '${a.issue.severity}')\">\n                <div class=\"alert-icon icon-${a.issue.severity}\">\n                    <ion-icon name=\"${a.issue.icon}-outline\"></ion-icon>\n                </div>\n                <div class=\"alert-content\">\n                    <div class=\"alert-header\">\n                        <span class=\"alert-title\">${a.issue.type}</span>\n                        <span class=\"alert-time\">${a.time}</span>\n                    </div>\n                    <p class=\"alert-desc\">${a.loc.name} • ${a.source.type}: ${a.source.name}</p>\n                </div>\n            </div>\n        `;\n    });\n    list.innerHTML = listHtml;\n}\n\nfunction renderReports() {\n    // Pending\n    const pendingBody = document.getElementById('pending-tbody');\n    pendingBody.innerHTML = '';\n    \n    const filteredPending = pendingReports.filter(r => currentFilter === 'all' || r.type.severity === currentFilter);\n    \n    if (filteredPending.length === 0) {\n        pendingBody.innerHTML = `<tr><td colspan=\"8\" style=\"text-align:center; color:var(--text-muted);\">No pending reports match the selected filter.</td></tr>`;\n    } else {\n        let htmlContent = '';\n        filteredPending.forEach(r => {\n            htmlContent += `\n                <tr>\n                    <td><strong>${r.id}</strong></td>\n                    <td>${r.loc}</td>\n                    <td><span class=\"badge badge-${r.type.severity === 'high' ? 'danger' : (r.type.severity === 'medium' ? 'warning' : 'success')}\">${r.type.type}</span></td>\n                    <td><span style=\"font-size: 0.8rem; font-weight: 500; color: ${r.source.type === 'IoT Sensor' ? 'var(--primary)' : 'var(--warning)'};\"><ion-icon name=\"${r.source.type === 'IoT Sensor' ? 'hardware-chip-outline' : 'people-outline'}\"></ion-icon> ${r.source.name}</span></td>\n                    <td style=\"color:var(--text-secondary); font-size: 0.9rem;\">${r.date}</td>\n                    <td>\n                        <select class=\"assignee-select\" onchange=\"updateReportStatus(this)\">\n                            <option value=\"Unassigned\">Unassigned</option>\n                            <option value=\"Riyadh Infra Co.\">Riyadh Infra Co.</option>\n                            <option value=\"City Maintenance\">City Maintenance</option>\n                            <option value=\"Fast Paving Ltd\">Fast Paving Ltd</option>\n                        </select>\n                    </td>\n                    <td><span class=\"status-badge badge\" style=\"margin:0;\">Pending</span></td>\n                    <td><button class=\"action-btn\" style=\"background:var(--surface-solid); color:var(--text-secondary); border:1px solid var(--border-color); padding:0.4rem;\" title=\"View Details\" onclick=\"openSnapshotModal('${r.loc}', '${r.type.type}', '${r.type.severity}', ${Math.floor(Math.random()*15 + 80)})\"><ion-icon name=\"eye-outline\" style=\"font-size:1.2rem; margin:0;\"></ion-icon></button></td>\n                </tr>\n            `;\n        });\n        pendingBody.innerHTML = htmlContent;\n    }\n\n    // Handled\n    const handledBody = document.getElementById('handled-tbody');\n    handledBody.innerHTML = '';\n    let handledHtml = '';\n    handledReports.forEach(r => {\n        handledHtml += `\n            <tr>\n                <td><strong>${r.id}</strong></td>\n                <td>${r.loc}</td>\n                <td>${r.type}</td>\n                <td><span style=\"font-size: 0.8rem; font-weight: 500; color: ${r.source.type === 'IoT Sensor' ? 'var(--primary)' : 'var(--warning)'};\"><ion-icon name=\"${r.source.type === 'IoT Sensor' ? 'hardware-chip-outline' : 'people-outline'}\"></ion-icon> ${r.source.type}</span></td>\n                <td>${r.source.name}</td>\n                <td>${r.date}</td>\n                <td>${r.contractor}</td>\n                <td><span class=\"badge badge-success\"><ion-icon name=\"checkmark-circle-outline\"></ion-icon> ${r.status}</span></td>\n                <td><button class=\"action-btn\" style=\"background:var(--surface-solid); color:var(--text-secondary); border:1px solid var(--border-color); padding:0.4rem;\" title=\"View Details\" onclick=\"openSnapshotModal('${r.loc}', '${r.type}', 'low', 99)\"><ion-icon name=\"eye-outline\" style=\"font-size:1.2rem; margin:0;\"></ion-icon></button></td>\n            </tr>\n        `;\n    });\n    handledBody.innerHTML = handledHtml;\n}\n\nfunction initCharts() {\n    // Deterioration Forecast Area Chart (Simplified & understandable)\n    const deteriorationOptions = {\n        series: [{\n            name: 'Forecasted High-Risk Defects',\n            data: [24, 38, 65, 110, 165, 230]\n        }],\n        chart: {\n            height: 380,\n            type: 'area',\n            toolbar: { show: false },\n            fontFamily: 'Inter, sans-serif',\n            animations: { enabled: true, easing: 'easeinout', speed: 800 }\n        },\n        stroke: { curve: 'smooth', width: 3 },\n        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.05, stops: [0, 90, 100] } },\n        colors: ['#ef4444'],\n        dataLabels: { enabled: false },\n        labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],\n        xaxis: { \n            title: { text: 'Upcoming Months', style: { color: '#94a3b8', fontSize: '13px' } },\n            labels: { style: { colors: '#475569' } }\n        },\n        yaxis: { \n            title: { text: 'Total Active Unrepaired Defects', style: { color: '#94a3b8', fontSize: '13px' } },\n            labels: { style: { colors: '#475569' } }\n        },\n        annotations: {\n            yaxis: [{\n                y: 100,\n                borderColor: '#f59e0b',\n                strokeDashArray: 4,\n                label: { borderColor: '#f59e0b', style: { color: '#fff', background: '#f59e0b' }, text: 'City Maintenance Threshold' }\n            }]\n        },\n        tooltip: { theme: 'light' }\n    };\n\n    const deteriorationChart = new ApexCharts(document.querySelector(\"#deteriorationChart\"), deteriorationOptions);\n    deteriorationChart.render();\n\n    // Distribution Chart (Donut)\n    const distributionOptions = {\n        series: [45, 30, 15, 10],\n        chart: { type: 'donut', height: 260, fontFamily: 'Inter, sans-serif' },\n        labels: ['Uneven Surface', 'Surface Crack', 'Deep Pothole', 'Degradation'],\n        colors: ['#2563eb', '#f59e0b', '#ef4444', '#64748b'],\n        plotOptions: { pie: { donut: { size: '65%' } } },\n        dataLabels: { enabled: false },\n        legend: { position: 'bottom', fontSize: '11px', itemMargin: { horizontal: 5, vertical: 0 } },\n        stroke: { show: false }\n    };\n    new ApexCharts(document.querySelector(\"#distributionChart\"), distributionOptions).render();\n\n    // Uptime Radial Chart\n    const uptimeOptions = {\n        series: [99.8],\n        chart: { height: 260, type: 'radialBar', fontFamily: 'Inter, sans-serif' },\n        plotOptions: {\n            radialBar: {\n                hollow: { size: '65%' },\n                dataLabels: {\n                    name: { show: true, fontSize: '13px', color: '#475569', offsetY: -10 },\n                    value: { show: true, fontSize: '2rem', fontWeight: 700, color: '#10b981', formatter: function(val) { return val + \"%\" } }\n                }\n            }\n        },\n        labels: ['Fleet Uptime'],\n        colors: ['#10b981'],\n        stroke: { lineCap: 'round' }\n    };\n\n    const uptimeChart = new ApexCharts(document.querySelector(\"#uptimeChart\"), uptimeOptions);\n    uptimeChart.render();\n}\n\n// Interactivity Initialization\ndocument.addEventListener('DOMContentLoaded', () => {\n    \n    // Init Leaflet map\n    initMap();\n    initCharts();\n\n    // Initial Data loading - Generate exactly 18 alerts to populate the map densely\n    for(let i=0; i<18; i++) generateAlert();\n    renderReports();\n\n    // Simulate Live Updates\n    setInterval(() => {\n        if(Math.random() > 0.4) generateAlert(); // Randomly generate events\n    }, 5500);\n\n    // Simulate Fleet Movement\n    setInterval(() => {\n        fleetMarkers.forEach(m => {\n            const pos = m.getLatLng();\n            m.setLatLng([pos.lat + (Math.random()-0.5)*0.002, pos.lng + (Math.random()-0.5)*0.002]);\n        });\n    }, 2000);\n\n    // Filter event\n    document.getElementById('severity-filter').addEventListener('change', renderDashboard);\n\n    // Tab Navigation\n    const tabBtns = document.querySelectorAll('.tab-btn');\n    const tabContents = document.querySelectorAll('.tab-content');\n\n    tabBtns.forEach(btn => {\n        btn.addEventListener('click', () => {\n            // Remove active classes\n            tabBtns.forEach(b => b.classList.remove('active'));\n            tabContents.forEach(c => c.classList.remove('active'));\n\n            // Add active class\n            btn.classList.add('active');\n            document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');\n        });\n    });\n\n    // Close sidebar on mobile link click\n    document.querySelectorAll('.nav-links a').forEach(link => {\n        link.addEventListener('click', () => {\n            if (window.innerWidth <= 768) {\n                document.getElementById('sidebar').classList.remove('open');\n                document.getElementById('sidebar-overlay').classList.remove('visible');\n            }\n        });\n    });\n\n    // Highly Reliable Scroll Spy using Intersection Observer\n    const sections = document.querySelectorAll('section[id]');\n    const navLinks = document.querySelectorAll('.nav-links a');\n\n    const observerOptions = {\n        root: null,\n        rootMargin: '-30% 0px -50% 0px', // Trigger when section is in the top-middle of the screen\n        threshold: 0\n    };\n\n    const observer = new IntersectionObserver((entries) => {\n        entries.forEach(entry => {\n            if (entry.isIntersecting) {\n                const currentId = entry.target.getAttribute('id');\n                navLinks.forEach(a => {\n                    a.classList.remove('active');\n                    if (a.getAttribute('href') === `#${currentId}`) {\n                        a.classList.add('active');\n                    }\n                });\n            }\n        });\n    }, observerOptions);\n\n    sections.forEach(section => observer.observe(section));\n\n    // Throttled Scroll Listener using requestAnimationFrame for smoothness\n    let isTicking = false;\n    window.addEventListener('scroll', () => {\n        if (!isTicking) {\n            window.requestAnimationFrame(() => {\n                // Potential scroll-based animations could go here\n                isTicking = false;\n            });\n            isTicking = true;\n        }\n    });\n\n    // Initial Live Map init\n    initLiveMap();\n    connectWebSocket();\n});\n
+                }
+            });
+        }
+    }
+
+    // Render Alerts List
+    const list = document.getElementById('alerts-list');
+    if (!list) return;
+
+    let listHtml = '';
+    recentAlerts.forEach((a) => {
+        // Only show if it matches filter
+        if (filter !== 'all' && a.issue.severity !== filter) return;
+
+        listHtml += `
+            <div class=\"alert-item border-${a.issue.severity}\" 
+                 onclick=\"focusOnAlert(${a.lat}, ${a.lng}, '${a.loc.name.replace(/'/g, \"\\\\'\")}', '${a.issue.type.replace(/'/g, \"\\\\'\")}', '${a.issue.severity}')\">
+                <div class=\"alert-icon icon-${a.issue.severity}\">
+                    <ion-icon name=\"${a.issue.icon}-outline\"></ion-icon>
+                </div>
+                <div class=\"alert-content\">
+                    <div class=\"alert-header\">
+                        <span class=\"alert-title\">${a.issue.type}</span>
+                        <span class=\"alert-time\">${a.time}</span>
+                    </div>
+                    <p class=\"alert-desc\">${a.loc.name} • ${a.source.type}: ${a.source.name}</p>
+                </div>
+            </div>
+        `;
+    });
+    list.innerHTML = listHtml;
+}
+
+function renderReports() {
+    // Pending
+    const pendingBody = document.getElementById('pending-tbody');
+    pendingBody.innerHTML = '';
+    
+    const filteredPending = pendingReports.filter(r => currentFilter === 'all' || r.type.severity === currentFilter);
+    
+    if (filteredPending.length === 0) {
+        pendingBody.innerHTML = `<tr><td colspan=\"8\" style=\"text-align:center; color:var(--text-muted);\">No pending reports match the selected filter.</td></tr>`;
+    } else {
+        let htmlContent = '';
+        filteredPending.forEach(r => {
+            htmlContent += `
+                <tr>
+                    <td><strong>${r.id}</strong></td>
+                    <td>${r.loc}</td>
+                    <td><span class=\"badge badge-${r.type.severity === 'high' ? 'danger' : (r.type.severity === 'medium' ? 'warning' : 'success')}\">${r.type.type}</span></td>
+                    <td><span style=\"font-size: 0.8rem; font-weight: 500; color: ${r.source.type === 'IoT Sensor' ? 'var(--primary)' : 'var(--warning)'};\"><ion-icon name=\"${r.source.type === 'IoT Sensor' ? 'hardware-chip-outline' : 'people-outline'}\"></ion-icon> ${r.source.name}</span></td>
+                    <td style=\"color:var(--text-secondary); font-size: 0.9rem;\">${r.date}</td>
+                    <td>
+                        <select class=\"assignee-select\" onchange=\"updateReportStatus(this)\">
+                            <option value=\"Unassigned\">Unassigned</option>
+                            <option value=\"Riyadh Infra Co.\">Riyadh Infra Co.</option>
+                            <option value=\"City Maintenance\">City Maintenance</option>
+                            <option value=\"Fast Paving Ltd\">Fast Paving Ltd</option>
+                        </select>
+                    </td>
+                    <td><span class=\"status-badge badge\" style=\"margin:0;\">Pending</span></td>
+                    <td><button class=\"action-btn\" style=\"background:var(--surface-solid); color:var(--text-secondary); border:1px solid var(--border-color); padding:0.4rem;\" title=\"View Details\" onclick=\"openSnapshotModal('${r.loc}', '${r.type.type}', '${r.type.severity}', ${Math.floor(Math.random()*15 + 80)})\"><ion-icon name=\"eye-outline\" style=\"font-size:1.2rem; margin:0;\"></ion-icon></button></td>
+                </tr>
+            `;
+        });
+        pendingBody.innerHTML = htmlContent;
+    }
+
+    // Handled
+    const handledBody = document.getElementById('handled-tbody');
+    handledBody.innerHTML = '';
+    let handledHtml = '';
+    handledReports.forEach(r => {
+        handledHtml += `
+            <tr>
+                <td><strong>${r.id}</strong></td>
+                <td>${r.loc}</td>
+                <td>${r.type}</td>
+                <td><span style=\"font-size: 0.8rem; font-weight: 500; color: ${r.source.type === 'IoT Sensor' ? 'var(--primary)' : 'var(--warning)'};\"><ion-icon name=\"${r.source.type === 'IoT Sensor' ? 'hardware-chip-outline' : 'people-outline'}\"></ion-icon> ${r.source.type}</span></td>
+                <td>${r.source.name}</td>
+                <td>${r.date}</td>
+                <td>${r.contractor}</td>
+                <td><span class=\"badge badge-success\"><ion-icon name=\"checkmark-circle-outline\"></ion-icon> ${r.status}</span></td>
+                <td><button class=\"action-btn\" style=\"background:var(--surface-solid); color:var(--text-secondary); border:1px solid var(--border-color); padding:0.4rem;\" title=\"View Details\" onclick=\"openSnapshotModal('${r.loc}', '${r.type}', 'low', 99)\"><ion-icon name=\"eye-outline\" style=\"font-size:1.2rem; margin:0;\"></ion-icon></button></td>
+            </tr>
+        `;
+    });
+    handledBody.innerHTML = handledHtml;
+}
+
+function initCharts() {
+    // Deterioration Forecast Area Chart (Simplified & understandable)
+    const deteriorationOptions = {
+        series: [{
+            name: 'Forecasted High-Risk Defects',
+            data: [24, 38, 65, 110, 165, 230]
+        }],
+        chart: {
+            height: 380,
+            type: 'area',
+            toolbar: { show: false },
+            fontFamily: 'Inter, sans-serif',
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
+        stroke: { curve: 'smooth', width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.05, stops: [0, 90, 100] } },
+        colors: ['#ef4444'],
+        dataLabels: { enabled: false },
+        labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+        xaxis: { 
+            title: { text: 'Upcoming Months', style: { color: '#94a3b8', fontSize: '13px' } },
+            labels: { style: { colors: '#475569' } }
+        },
+        yaxis: { 
+            title: { text: 'Total Active Unrepaired Defects', style: { color: '#94a3b8', fontSize: '13px' } },
+            labels: { style: { colors: '#475569' } }
+        },
+        annotations: {
+            yaxis: [{
+                y: 100,
+                borderColor: '#f59e0b',
+                strokeDashArray: 4,
+                label: { borderColor: '#f59e0b', style: { color: '#fff', background: '#f59e0b' }, text: 'City Maintenance Threshold' }
+            }]
+        },
+        tooltip: { theme: 'light' }
+    };
+
+    const deteriorationChart = new ApexCharts(document.querySelector(\"#deteriorationChart\"), deteriorationOptions);
+    deteriorationChart.render();
+
+    // Distribution Chart (Donut)
+    const distributionOptions = {
+        series: [45, 30, 15, 10],
+        chart: { type: 'donut', height: 260, fontFamily: 'Inter, sans-serif' },
+        labels: ['Uneven Surface', 'Surface Crack', 'Deep Pothole', 'Degradation'],
+        colors: ['#2563eb', '#f59e0b', '#ef4444', '#64748b'],
+        plotOptions: { pie: { donut: { size: '65%' } } },
+        dataLabels: { enabled: false },
+        legend: { position: 'bottom', fontSize: '11px', itemMargin: { horizontal: 5, vertical: 0 } },
+        stroke: { show: false }
+    };
+    new ApexCharts(document.querySelector(\"#distributionChart\"), distributionOptions).render();
+
+    // Uptime Radial Chart
+    const uptimeOptions = {
+        series: [99.8],
+        chart: { height: 260, type: 'radialBar', fontFamily: 'Inter, sans-serif' },
+        plotOptions: {
+            radialBar: {
+                hollow: { size: '65%' },
+                dataLabels: {
+                    name: { show: true, fontSize: '13px', color: '#475569', offsetY: -10 },
+                    value: { show: true, fontSize: '2rem', fontWeight: 700, color: '#10b981', formatter: function(val) { return val + \"%\" } }
+                }
+            }
+        },
+        labels: ['Fleet Uptime'],
+        colors: ['#10b981'],
+        stroke: { lineCap: 'round' }
+    };
+
+    const uptimeChart = new ApexCharts(document.querySelector(\"#uptimeChart\"), uptimeOptions);
+    uptimeChart.render();
+}
+
+// Interactivity Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Init Leaflet map
+    initMap();
+    initCharts();
+
+    // Initial Data loading - Generate exactly 18 alerts to populate the map densely
+    for(let i=0; i<18; i++) generateAlert();
+    renderReports();
+
+    // Simulate Live Updates
+    setInterval(() => {
+        if(Math.random() > 0.4) generateAlert(); // Randomly generate events
+    }, 5500);
+
+    // Simulate Fleet Movement
+    setInterval(() => {
+        fleetMarkers.forEach(m => {
+            const pos = m.getLatLng();
+            m.setLatLng([pos.lat + (Math.random()-0.5)*0.002, pos.lng + (Math.random()-0.5)*0.002]);
+        });
+    }, 2000);
+
+    // Filter event
+    document.getElementById('severity-filter').addEventListener('change', renderDashboard);
+
+    // Tab Navigation
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active classes
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            // Add active class
+            btn.classList.add('active');
+            document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        });
+    });
+
+    // Close sidebar on mobile link click
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('sidebar-overlay').classList.remove('visible');
+            }
+        });
+    });
+
+    // Highly Reliable Scroll Spy using Intersection Observer
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+
+    const observerOptions = {
+        root: null,
+        rootMargin: '-30% 0px -50% 0px', // Trigger when section is in the top-middle of the screen
+        threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const currentId = entry.target.getAttribute('id');
+                navLinks.forEach(a => {
+                    a.classList.remove('active');
+                    if (a.getAttribute('href') === `#${currentId}`) {
+                        a.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    // Throttled Scroll Listener using requestAnimationFrame for smoothness
+    let isTicking = false;
+    window.addEventListener('scroll', () => {
+        if (!isTicking) {
+            window.requestAnimationFrame(() => {
+                // Potential scroll-based animations could go here
+                isTicking = false;
+            });
+            isTicking = true;
+        }
+    });
+
+    // Initial Live Map init
+    initLiveMap();
+    connectWebSocket();
+});
