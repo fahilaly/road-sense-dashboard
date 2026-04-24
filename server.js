@@ -117,7 +117,7 @@ app.get('/api/test-heartbeat', (req, res) => {
 // ──────────────────────────────────────
 // Start server
 // ──────────────────────────────────────
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     // Get local IP for ESP32 configuration
     const os = require('os');
