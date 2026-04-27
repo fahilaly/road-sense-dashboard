@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Sense — XTHON Pitch Deck Guide (Updated)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#2563eb; --bg:#0f172a; --card:#1e293b; --text:#e2e8f0; --muted:#94a3b8; --accent:#f59e0b; --danger:#ef4444; --success:#10b981; --border:#334155; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; padding:40px 20px; }
+        .container { max-width:950px; margin:0 auto; }
+        header { text-align:center; margin-bottom:50px; }
+        h1 { font-size:2.4rem; background:linear-gradient(135deg,var(--primary),#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        header p { color:var(--muted); margin-top:8px; }
+        .slide { background:var(--card); border-radius:14px; padding:28px 32px; margin-bottom:28px; border-left:5px solid var(--primary); }
+        .slide-head { display:flex; align-items:center; gap:14px; border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:18px; }
+        .num { background:var(--primary); color:#fff; font-weight:700; padding:4px 13px; border-radius:20px; font-size:.85rem; white-space:nowrap; }
+        .slide-head h2 { font-size:1.35rem; }
+        .label { font-weight:700; color:var(--muted); text-transform:uppercase; font-size:.8rem; letter-spacing:.06em; margin-top:16px; margin-bottom:6px; }
+        .visual { background:rgba(37,99,235,.12); border:1px dashed rgba(37,99,235,.4); padding:14px 18px; border-radius:10px; color:#93c5fd; margin-bottom:14px; }
+        .visual strong { color:var(--primary); }
+        .content-box { background:var(--bg); padding:18px 22px; border-radius:10px; }
+        .content-box ul { padding-left:20px; }
+        .content-box li { margin-bottom:6px; }
+        .notes { background:rgba(245,158,11,.08); border-left:4px solid var(--accent); padding:14px 20px; margin-top:14px; font-style:italic; color:#fcd34d; }
+        .data-table { width:100%; border-collapse:collapse; margin:10px 0; font-size:.92rem; }
+        .data-table th { background:var(--primary); color:#fff; padding:10px 14px; text-align:left; }
+        .data-table td { padding:10px 14px; border-bottom:1px solid var(--border); }
+        .data-table tr:nth-child(even) td { background:rgba(255,255,255,.03); }
+        .highlight { color:var(--success); font-weight:700; }
+        .danger { color:var(--danger); font-weight:700; }
+        .component-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 0; }
+        .comp-card { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:14px; }
+        .comp-card h4 { color:var(--primary); margin-bottom:4px; font-size:.95rem; }
+        .comp-card p { color:var(--muted); font-size:.85rem; margin:0; }
+        .kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:12px 0; }
+        .kpi { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center; }
+        .kpi .val { font-size:1.6rem; font-weight:800; }
+        .kpi .lbl { font-size:.78rem; color:var(--muted); text-transform:uppercase; margin-top:4px; }
+        .chart-label { display:inline-block; background:rgba(37,99,235,.15); color:var(--primary); padding:3px 10px; border-radius:6px; font-size:.82rem; font-weight:600; margin:3px 2px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<header>
+    <h1>Road Sense — XTHON4 Pitch Deck Guide</h1>
+    <p>Updated with real financial data, hardware components & dashboard analytics</p>
+</header>
+
+<!-- ══════════ SLIDE 1-2 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 1 & 2</span><h2>Title & Cover</h2></div>
+    <div class="visual"><strong>🖼️ Visuals:</strong> Sleek photo of a Riyadh highway + Road Sense logo. Keep it clean and bold.</div>
+    <div class="content-box">
+        <ul>
+            <li><strong>Project Name:</strong> Road Sense</li>
+            <li><strong>Subtitle:</strong> Transforming City Fleets into Smart Infrastructure Sensors</li>
+            <li><strong>Tagline:</strong> Proactive road maintenance powered by Edge AI and IoT.</li>
+        </ul>
+    </div>
+    <div class="notes">"Good morning judges. We are Road Sense — we turn everyday vehicles into a smart sensor network to proactively monitor our city's road infrastructure."</div>
+</div>
+
+<!-- ══════════ SLIDE 3 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 3</span><h2>Problem Statement</h2></div>
+    <div class="visual"><strong>📊 Include Chart:</strong> A bar chart showing "SAR 4–11/m (early crack seal)" vs "SAR 100–200/m² (late pothole repair)" — a <span class="danger">1,000% cost increase</span> from delayed maintenance.</div>
+    <div class="content-box">
+        <ul>
+            <li>Road traffic crashes in Saudi Arabia were estimated to cost <strong>SAR 137.6 billion</strong> in 2022, equal to 3.3% of GDP.</li>
+            <li>Poor or degraded road conditions can contribute to crash risk, but Road Sense focuses specifically on the infrastructure-monitoring part: potholes, cracks, uneven surfaces, and early road degradation.</li>
+            <li>KSA allocated <strong>SAR 42 billion</strong> to infrastructure and transportation in the 2025 budget, showing that the opportunity is not only budget availability, but smarter data-driven maintenance.</li>
+            <li>Today, many road defects are still handled reactively: after complaints, inspections, or visible failure. Delayed maintenance can cost several times more than early preventive repair.</li>
+            <li>Road Sense reduces this "data blindness" by turning existing city vehicles into continuous road-condition sensors.</li>
+        </ul>
+    </div>
+    <div class="notes">"Road traffic crashes in Saudi Arabia were estimated to cost 137.6 billion Riyals in 2022, which equals 3.3% of GDP. We are not claiming that all of this cost comes from potholes. Our point is that road infrastructure is one part of the safety equation, and today road defects are often discovered late. Road Sense gives municipalities real-time visibility before small defects become expensive and dangerous."</div>
+</div>
+
+<!-- ══════════ SLIDE 4 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 4</span><h2>Innovation Overview</h2></div>
+    <div class="visual"><strong>📊 Include Table:</strong> Side-by-side comparison table (from the Financial Report).</div>
+    <table class="data-table">
+        <thead><tr><th>Comparison</th><th>Current Systems (ARAN)</th><th>Road Sense</th></tr></thead>
+        <tbody>
+            <tr><td>Capital Cost</td><td class="danger">SAR 3.75 million / vehicle</td><td class="highlight">~SAR 75 / unit (bulk est.)</td></tr>
+            <tr><td>Operating Cost</td><td class="danger">SAR 375,000 (staff + maintenance)</td><td class="highlight">Low cloud cost (depot Wi-Fi upload)</td></tr>
+            <tr><td>City Coverage</td><td>Requires massive budgets & specialized teams</td><td class="highlight">SAR 375,000 for full city (5,000 buses)</td></tr>
+            <tr><td>Data Lifecycle</td><td>Annual survey (large data gaps)</td><td class="highlight">Daily updates via fleet depot upload</td></tr>
+        </tbody>
+    </table>
+    <div class="notes">"Current road-scanning systems can be expensive and are usually deployed periodically. Road Sense takes a different approach: instead of relying only on dedicated survey vehicles, we use low-cost IoT units installed on existing fleets. The 75 Riyal figure represents our practical bulk deployment cost, utilizing the fleet's existing telematics to keep costs incredibly low."</div>
+</div>
+
+<!-- ══════════ SLIDE 5 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 5</span><h2>Target Audience</h2></div>
+    <div class="visual"><strong>🖼️ Visuals:</strong> Two icon columns — Government (Amanat/Municipality) and Citizens/Drivers.</div>
+    <div class="content-box">
+        <ul>
+            <li><strong>Primary:</strong> Municipalities & City Maintenance Authorities (Amanat). <em>Need:</em> Real-time data to prioritize repairs within their SAR 42B budget.</li>
+            <li><strong>Secondary:</strong> Everyday Citizens & Drivers. <em>Need:</em> Safer roads, fewer vehicle damages.</li>
+        </ul>
+    </div>
+    <div class="notes">"Our primary users are municipalities who need cost-effective, real-time data. Ultimately, solving this benefits every citizen driving on our roads."</div>
+</div>
+
+<!-- ══════════ SLIDE 6 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 6</span><h2>Value Proposition</h2></div>
+    <div class="visual"><strong>📊 Include Chart:</strong> "Deterioration Curve" — show a crack at SAR 4–11/m escalating to SAR 100–200/m² over time if ignored. Reference: PCI index must stay above 50.3.</div>
+    <div class="content-box">
+        <ul>
+            <li><strong>From reactive to predictive:</strong> detects early vibration patterns that may indicate potholes, cracks, or uneven surfaces.</li>
+            <li><strong>Early intervention is significantly cheaper than delayed repair:</strong> the report compares crack sealing at around SAR 4–11 per linear meter against late-stage repair/resurfacing costs that can reach SAR 100–200 per square meter.</li>
+            <li><strong>Predictive maintenance</strong> can reduce unnecessary inspections and improve repair prioritization.</li>
+            <li><strong>Long-term value:</strong> supports longer pavement service life by helping municipalities repair defects before they become structural failures.</li>
+        </ul>
+    </div>
+    <div class="notes">"The value is not only detecting a pothole. The value is knowing where deterioration is starting, prioritizing the repair, and acting before it becomes a major resurfacing job. Our financial report shows how early crack sealing is much cheaper than late-stage repair, which is exactly where Road Sense creates value."</div>
+</div>
+
+<!-- ══════════ SLIDE 7 — PROTOTYPE ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 7</span><h2>Prototype & Components</h2></div>
+    <div class="visual"><strong>📸 CRITICAL — Include Photos:</strong><br>
+        ① A photo of your ESP32-C3 + MPU6050 breadboard wiring.<br>
+        ② A screenshot of the Road Sense live dashboard (map + detections).
+    </div>
+
+    <div class="label">Current Prototype (Proof of Concept)</div>
+    <div class="component-grid">
+        <div class="comp-card">
+            <h4>ESP32-C3 SuperMini</h4>
+            <p>Runs lightweight edge AI (sqrt(ax²+ay²+az²)) to filter vibrations. Sends JSON events to dashboard via Wi-Fi.</p>
+        </div>
+        <div class="comp-card">
+            <h4>GY-521 MPU6050</h4>
+            <p>I2C accelerometer/gyroscope. Detects low (≥1.5g), medium (≥2.0g), and high (≥3.0g) severity impacts.</p>
+        </div>
+    </div>
+    <div class="notes" style="margin-bottom:20px;">*Note: The current prototype only proves vibration-based detection and dashboard communication. It does NOT include GPS, dashcam, AI card, or image processing.*</div>
+
+    <div class="label">Fleet Deployment Architecture (Production)</div>
+    <div class="component-grid">
+        <div class="comp-card">
+            <h4>Low-Cost Vibration Trigger PCB</h4>
+            <p>ESP32 + MPU6050 + 12V/24V to 5V Buck Converter + Fuse tap. Powered safely from the vehicle fuse box.</p>
+        </div>
+        <div class="comp-card">
+            <h4>Reuse Existing Fleet Dashcams</h4>
+            <p>ESP32 sends a GPIO/UART trigger to the fleet's existing telematics unit to capture 1 snapshot + GPS + Timestamp.</p>
+        </div>
+        <div class="comp-card">
+            <h4>Depot Wi-Fi Upload</h4>
+            <p>Events are stored locally on the dashcam and uploaded when the bus returns to base. No LTE cost, no heavy video uploads.</p>
+        </div>
+        <div class="comp-card">
+            <h4>Software Stack</h4>
+            <p><strong>Firmware:</strong> Arduino C++ (Edge detection)<br><strong>Backend:</strong> Node.js, Express, WebSocket (Render)<br><strong>Frontend:</strong> HTML/CSS/JS, Leaflet maps, ApexCharts</p>
+        </div>
+    </div>
+    <div class="notes">"In deployment, Road Sense reuses existing fleet dashcams and GPS systems. We only add a low-cost ESP32 vibration trigger PCB powered from the fuse box. When abnormal impact is detected, it triggers the dashcam to capture one snapshot, attaches GPS, stores it locally, and uploads via depot Wi-Fi. This avoids constant internet dependency and keeps hardware costs very low."</div>
+</div>
+
+<!-- ══════════ SLIDE 8 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 8</span><h2>Market Viability</h2></div>
+    <div class="visual"><strong>📊 Include:</strong> A big stat card showing "SAR 42 Billion — KSA 2025 Transport Budget" and Vision 2030 target: "6th globally in road quality."</div>
+    <div class="content-box">
+        <ul>
+            <li><strong>KSA 2025 Infrastructure & Transportation allocation:</strong> SAR 42 billion.</li>
+            <li><strong>National direction:</strong> Saudi Arabia aims to improve road quality and reach 6th globally in road quality.</li>
+            <li>Road Sense aligns with <strong>Vision 2030</strong> by supporting safer roads, smarter municipal maintenance, and data-driven infrastructure management.</li>
+            <li><strong>Market expansion:</strong> the same model can scale to municipalities, bus fleets, logistics fleets, delivery companies, and smart-city operators.</li>
+        </ul>
+    </div>
+    <div class="notes">"This is a high-priority national problem. Saudi Arabia allocated 42 billion Riyals to infrastructure and transportation in the 2025 budget, and national transport targets include reaching 6th globally in road quality. Road Sense fits directly into this direction because it gives decision-makers continuous road-condition data instead of waiting for manual inspection cycles."</div>
+</div>
+
+<!-- ══════════ SLIDE 9 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 9</span><h2>Business Model</h2></div>
+    <div class="visual"><strong>🖼️ Visuals:</strong> Two pillars — "B2G Municipal SaaS" and "B2B Data Licensing."</div>
+    <div class="content-box">
+        <ul>
+            <li><strong>B2G SaaS:</strong> Monthly subscription for municipalities. Cloud costs remain low because the system only uploads single snapshots via depot Wi-Fi, not live video.</li>
+            <li><strong>B2B Data Licensing:</strong> Selling road quality APIs to logistics fleets, delivery services, insurance companies, and autonomous vehicle mapping.</li>
+            <li><strong>Hardware Cost:</strong> ~SAR 75/unit × 5,000 buses = SAR 375,000 for full city deployment.</li>
+        </ul>
+    </div>
+    <div class="notes">"Revenue comes from a SaaS subscription for municipalities. Since we only upload single snapshots via depot Wi-Fi, cloud costs stay very low. The hardware costs only 75 Riyals per unit. For 5,000 buses, the total deployment is just 375,000 Riyals."</div>
+</div>
+
+<!-- ══════════ SLIDE 10 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 10</span><h2>Feasibility</h2></div>
+    <div class="visual"><strong>🖼️ Visuals:</strong> Scaling graphic — 1 chip → 5,000 buses → city-wide coverage.</div>
+    <div class="content-box">
+        <ul>
+            <li><strong>Off-the-shelf components:</strong> ESP32-C3 + MPU6050 + Buck Converter — globally available, no custom fabrication.</li>
+            <li><strong>Unit cost: ~SAR 75.</strong> Full city (5,000 buses): SAR 375,000.</li>
+            <li><strong>Zero new expensive hardware:</strong> Leverages existing fleet dashcams and GPS telematics.</li>
+            <li><strong>Cloud optimization:</strong> Depot Wi-Fi upload means no monthly cellular LTE costs per vehicle.</li>
+        </ul>
+    </div>
+    <div class="notes">"This is highly feasible. We use off-the-shelf components costing 75 Riyals per unit. We can cover an entire city's bus fleet for less than the cost of a single traditional scanning vehicle's annual maintenance by reusing the fleet's existing dashcams."</div>
+</div>
+
+<!-- ══════════ SLIDE 11 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 11</span><h2>Challenges & Risks</h2></div>
+    <div class="visual"><strong>🖼️ Visuals:</strong> Two-column layout: Challenge on left, Mitigation on right.</div>
+    <div class="content-box">
+        <ul>
+            <li><strong>Challenge:</strong> Hardware durability (heat, vibration, dust) and power.
+                <br>→ <em>Mitigation:</em> Ruggedized enclosure, and using a 12V/24V to 5V buck converter safely tapped from the vehicle fuse box.</li>
+            <li><strong>Challenge:</strong> False positives — speed bumps or rough surfaces looking like potholes.
+                <br>→ <em>Mitigation:</em> Edge waveform analysis and cooldown timers. The dashcam snapshot allows operators to visually verify defects before dispatch.</li>
+            <li><strong>Challenge:</strong> GPS and Data Costs.
+                <br>→ <em>Mitigation:</em> Reusing the fleet's existing telematics unit for GPS tagging and uploading via Depot Wi-Fi entirely eliminates LTE costs.</li>
+        </ul>
+    </div>
+    <div class="notes">"Our main challenges are false positives and hardware durability. We mitigate false positives with edge analysis and visual confirmation from the fleet's existing dashcam. And by reusing the fleet's GPS and uploading via Depot Wi-Fi, we completely eliminate cellular data costs."</div>
+</div>
+
+<!-- ══════════ SLIDE 12 — ANALYTICS ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 12</span><h2>Impact & Sustainability (Predictive Analytics)</h2></div>
+    <div class="visual"><strong>📊 Include these charts from the Dashboard:</strong><br>
+        <span class="chart-label">Projected Defect Escalation (6-Month Forecast)</span>
+        <span class="chart-label">Detections by Type (Donut)</span>
+        <span class="chart-label">Sensor Fleet Uptime (Target / Simulated: 99.8%)</span>
+    </div>
+
+    <div class="label">Dashboard KPIs to showcase</div>
+    <div class="kpi-row">
+        <div class="kpi"><div class="val danger">24</div><div class="lbl">Predicted Failures (30d)<br><small style="font-weight:normal;color:var(--muted);">Prototype model output</small></div></div>
+        <div class="kpi"><div class="val highlight">SAR 534K</div><div class="lbl">Estimated Proactive Savings YTD<br><small style="font-weight:normal;color:var(--muted);">Dashboard estimate</small></div></div>
+        <div class="kpi"><div class="val" style="color:var(--primary)">Oct 12–18</div><div class="lbl">Recommended Maintenance Window<br><small style="font-weight:normal;color:var(--muted);">AI scheduling output</small></div></div>
+    </div>
+
+    <div class="content-box">
+        <ul>
+            <li><strong>Short-term:</strong> immediate hazard mapping → faster repair prioritization → reduced exposure to dangerous road defects.</li>
+            <li><strong>Long-term:</strong> supports preventive maintenance by identifying early road degradation before it becomes expensive structural damage.</li>
+            <li><strong>Economic context:</strong> road traffic crashes in Saudi Arabia were estimated at SAR 137.6B in 2022, equal to 3.3% of GDP. Road Sense supports the infrastructure-monitoring side of road safety, but does not claim to eliminate the full crash cost.</li>
+            <li><strong>National alignment:</strong> supports Saudi Arabia’s target of reaching 6th globally in road quality.</li>
+            <li><strong>Cost logic:</strong> early crack sealing is much cheaper than delayed pothole repair or resurfacing, which is why predictive maintenance creates financial value.</li>
+        </ul>
+    </div>
+    <div class="notes">"This slide shows how the dashboard supports decisions. The 24 predicted failures, SAR 534K savings, and Oct 12–18 maintenance window are prototype dashboard outputs, not national statistics. The purpose is to show how a municipality could use live road data to prioritize repairs. Economically, the national road-safety cost is very large, but Road Sense contributes specifically by improving infrastructure visibility and enabling preventive maintenance."</div>
+</div>
+
+<!-- ══════════ SLIDE 13 ══════════ -->
+<div class="slide">
+    <div class="slide-head"><span class="num">Slide 13</span><h2>Conclusion</h2></div>
+    <div class="visual"><strong>🖼️ Visuals:</strong> Team photo + Road Sense logo. Bold closing statement.</div>
+    <div class="content-box">
+        <ul>
+            <li><strong>Innovators:</strong> [Your Names]</li>
+            <li><strong>Institution:</strong> [Your University/Team]</li>
+            <li><strong>Final Word:</strong> "Let's build smarter, safer roads — together."</li>
+        </ul>
+    </div>
+    <div class="notes">"Thank you for your time. We are Road Sense, and we believe the smartest cities are those that can feel and heal their own infrastructure. We're open for questions."</div>
+</div>
+
+<!-- ══════════ SOURCES ══════════ -->
+<div class="slide" style="border-left-color:var(--accent);">
+    <div class="slide-head"><span class="num" style="background:var(--accent);">Appendix</span><h2>Sources (from Financial Report)</h2></div>
+    <div class="content-box" style="font-size:.85rem;">
+        <ul>
+            <li>KSA Transport Budget 2025 — <a href="https://www.aleqt.com/2024/11/26/article_2753428.html" style="color:var(--primary);">aleqt.com</a></li>
+            <li>Road Transport Statistics 2024 — <a href="https://www.stats.gov.sa" style="color:var(--primary);">stats.gov.sa</a></li>
+            <li>Vision 2030 Road Quality Targets — <a href="https://spa.gov.sa/en/N2355124" style="color:var(--primary);">SPA</a></li>
+            <li>Road Accident Costs in KSA — <a href="https://pubmed.ncbi.nlm.nih.gov/41063942/" style="color:var(--primary);">PubMed</a></li>
+            <li>AI Predictive Maintenance for Roads — <a href="https://www.roadvision.ai" style="color:var(--primary);">roadvision.ai</a></li>
+            <li>Low-cost Road Assessment System — <a href="https://www.researchgate.net/publication/395498908" style="color:var(--primary);">ResearchGate</a></li>
+            <li>Economics of Road Maintenance — <a href="https://www.bitre.gov.au" style="color:var(--primary);">BITRE</a></li>
+        </ul>
+    </div>
+</div>
+
+</div>
+</body>
+</html>
