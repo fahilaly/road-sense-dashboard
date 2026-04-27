@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Sense - Hardware, Software & Code Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 40px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        .item-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .item-card img {
+            width: 150px;
+            height: 150px;
+            border-radius: 8px;
+            object-fit: contain;
+            background-color: #fff;
+            border: 1px solid #eee;
+            padding: 5px;
+        }
+        .item-details {
+            flex: 1;
+        }
+        .item-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+        .item-desc {
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .code-box {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+        @media print {
+            body {
+                background-color: #fff;
+            }
+            .item-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+            .code-box {
+                background-color: #f4f4f4;
+                color: #000;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Road Sense Project Guide</h1>
+    <p style="text-align: center; color: #666;">A simple overview of the hardware, software, and logic powering the Road Sense platform.</p>
+
+    <h2>🛠️ Hardware Used</h2>
+
+    <div class="item-card">
+        <!-- Reliable Wikimedia image for ESP32 -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/ESP32_Espressif.jpg" alt="ESP32 Microcontroller">
+        <div class="item-details">
+            <div class="item-title">1. ESP32-C3 Microcontroller</div>
+            <div class="item-desc">
+                <strong>What it is:</strong> The "brain" of the project.<br>
+                <strong>What it does:</strong> It's a tiny, powerful computer with built-in Wi-Fi. It runs the C++ code, communicates with the sensor to read bump data, and connects to the internet to send that data to your web dashboard.
+            </div>
+        </div>
+    </div>
+
+    <div class="item-card">
+        <!-- Reliable Wikimedia image for MPU6050 -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/MPU-6050_gyroscope_and_accelerometer_module_%28front_side%29.jpg" alt="MPU6050 Sensor">
+        <div class="item-details">
+            <div class="item-title">2. MPU6050 (GY-521) Sensor</div>
+            <div class="item-desc">
+                <strong>What it is:</strong> An Accelerometer and Gyroscope sensor.<br>
+                <strong>What it does:</strong> It measures movement and g-force in 3 directions (Up/Down, Left/Right, Forward/Backward). This is how the system feels "bumps" and "potholes" on the road.
+            </div>
+        </div>
+    </div>
+
+    <div class="item-card">
+        <!-- Reliable Wikimedia image for PCB -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Printed_circuit_board.jpg" alt="Custom PCB">
+        <div class="item-details">
+            <div class="item-title">3. Custom PCB & Buck Converter</div>
+            <div class="item-desc">
+                <strong>What it is:</strong> The physical hardware foundation.<br>
+                <strong>What it does:</strong> Instead of fragile jumper wires, a Custom Printed Circuit Board (PCB) securely connects the ESP32 brain to the MPU6050 sensor. The board includes a 12V/24V to 5V Buck Converter, allowing it to be wired safely and directly into the vehicle's fuse box for permanent power.
+            </div>
+        </div>
+    </div>
+
+    <h2>💻 Software Used</h2>
+
+    <div class="item-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/Arduino_Logo.svg" alt="Arduino IDE">
+        <div class="item-details">
+            <div class="item-title">1. Arduino IDE</div>
+            <div class="item-desc">
+                <strong>What it is:</strong> A programming application for your computer.<br>
+                <strong>What it does:</strong> We used this to write the code, compile it, and upload the instructions into the ESP32 chip. It also gives us the "Serial Monitor" to see live diagnostic messages.
+            </div>
+        </div>
+    </div>
+
+    <div class="item-card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Web Dashboard">
+        <div class="item-details">
+            <div class="item-title">2. Road Sense Web Dashboard</div>
+            <div class="item-desc">
+                <strong>What it is:</strong> Your custom website interface and database.<br>
+                <strong>What it does:</strong> It listens for incoming bump data from the ESP32, saves it, and displays it in real-time so users can monitor road infrastructure issues.
+            </div>
+        </div>
+    </div>
+
+    <div class="item-card">
+        <!-- Render Cloud logo -->
+        <img src="https://images.g2crowd.com/uploads/product/image/large_detail/large_detail_b0d9eaf3ef3ad2eb21c43f77df2ec6dd/render.png" alt="Render">
+        <div class="item-details">
+            <div class="item-title">3. Render (Cloud Hosting)</div>
+            <div class="item-desc">
+                <strong>What it is:</strong> A cloud hosting platform.<br>
+                <strong>What it does:</strong> It hosts your web dashboard on the internet 24/7. This allows your ESP32 to send data securely to your dashboard no matter where it is, as long as it has an internet connection.
+            </div>
+        </div>
+    </div>
+
+    <h2>🧠 Code Explanation (How it Works)</h2>
+    <p>The code running on the ESP32 is responsible for continuously reading the road surface and deciding if an anomaly (like a pothole) occurred. Here is a simplified breakdown of the core logic.</p>
+
+    <h3>1. Reading the Raw Acceleration</h3>
+    <p>The ESP32 asks the MPU6050 sensor for the current acceleration on all 3 spatial axes. The sensor measures this in "g-force" (where 1.0g is standard Earth gravity).</p>
+    <ul>
+        <li><code>ax</code> (X-axis: Left/Right)</li>
+        <li><code>ay</code> (Y-axis: Forward/Backward)</li>
+        <li><code>az</code> (Z-axis: Up/Down)</li>
+    </ul>
+
+    <h3>2. Calculating the "Total Magnitude"</h3>
+    <p>When the vehicle hits a bump, the sensor shakes in multiple directions at once. To figure out the overall force of the bump, the code uses a 3D Pythagorean theorem formula to combine all three axes into a single <code>magnitude</code> number.</p>
+    <div class="code-box">
+        float magnitude = sqrt(ax * ax + ay * ay + az * az);
+    </div>
+    <p>Sitting perfectly still, this number is ~1.0g. When a bump occurs, this number spikes sharply (e.g., to 2.5g or 4.0g).</p>
+
+    <h3>3. Categorizing the Severity</h3>
+    <p>Once the code has the <code>magnitude</code>, it compares it against three predefined thresholds to categorize the severity of the bump:</p>
+    <div class="code-box">
+        if (magnitude > 3.0) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;severity = "high";      // Deep Pothole<br>
+        } else if (magnitude > 2.0) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;severity = "medium";    // Surface Crack<br>
+        } else if (magnitude > 1.5) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;severity = "low";       // Uneven Surface<br>
+        }
+    </div>
+    <ul>
+        <li><strong>HIGH (> 3.0g):</strong> Represents a violent jolt, like dropping into a deep pothole or hitting a large object.</li>
+        <li><strong>MEDIUM (> 2.0g):</strong> A noticeable, jarring bump, such as a major surface crack or speedbump hit too fast.</li>
+        <li><strong>LOW (> 1.5g):</strong> A mild thud or minor unevenness in the road.</li>
+    </ul>
+    <p>If the magnitude never reaches 1.5g, the system ignores it as normal road vibration. If a bump is detected, the ESP32 instantly packages this data and sends it over Wi-Fi via an HTTP POST request to your cloud-hosted dashboard.</p>
+
+    <h2>🚀 Future Optimizations (Real-World Implementation)</h2>
+    <p>The Road Sense ESP32 prototype relies on inertial sensors for extreme reliability in all lighting and weather conditions. The following optimizations represent the core of the edge computing firmware planned for the production release:</p>
+
+    <h3>1. Pothole vs. Speed Bump Recognition (The "Drop" Signature)</h3>
+    <p>Right now, hitting a pothole and hitting a speed bump will both register as a high-g "bump".</p>
+    <p><strong>Optimization Strategy:</strong> Instead of just looking at the total magnitude, the firmware analyzes the Z-axis (up and down) waveform.</p>
+    <ul>
+        <li><strong>Speed Bump:</strong> The vehicle goes UP first (positive Z spike), then down.</li>
+        <li><strong>Pothole:</strong> The tire drops into the hole first (a momentary drop in Z-force, almost like brief zero-gravity), followed immediately by a massive positive Z spike when the tire slams into the lip of the hole.</li>
+    </ul>
+    <p>By writing code that looks for this exact <em>-Z followed by +Z</em> signature, the ESP32 can filter out intentional infrastructure like speed bumps.</p>
+
+    <h3>2. Suspension Auto-Calibration</h3>
+    <p>A 3.0g bump in a heavy municipal bus with stiff air suspension feels very different from a 3.0g bump in a standard transit van.</p>
+    <p><strong>Optimization Strategy:</strong> Implement a moving average "baseline" in the firmware. When the vehicle is driving on a smooth road, the ESP32 calculates the average background vibration (Exponential Moving Average). It triggers an alert only when a sudden spike is mathematically higher than that specific vehicle's baseline.</p>
+
+    <h3>3. Advanced Window Buffering & Speed Context (Spatial Debouncing)</h3>
+    <p>Currently, a 2000ms cooldown is used. If a bus drives over a rumble strip, it will spam the dashboard with alerts.</p>
+    <p><strong>Optimization Strategy:</strong> The ESP32 utilizes a circular buffer to hold 3-5 seconds of driving data in its memory. If it detects continuous heavy vibrations, it aggregates the data and classifies the entire area as a "Degraded Road Surface" rather than 10 individual "Potholes". Additionally, integrating vehicle speed data (e.g., via GPS or OBD-II) will ensure that bumps hit at 60mph vs 10mph are scaled and categorized appropriately, reducing false positives.</p>
+
+    <h2>❓ Common Questions & Answers</h2>
+    
+    <h3>1. How does the device get internet out on the road?</h3>
+    <p><strong>Answer:</strong> The current prototype uses a mobile Wi-Fi hotspot to prove the concept. However, the final production version completely avoids expensive LTE cellular modules. Instead, it stores events locally on the fleet's dashcam and automatically uploads them when the vehicle returns to base and connects to the municipal <strong>Depot Wi-Fi</strong>.</p>
+
+    <h3>2. What happens if the vehicle temporarily loses that internet connection?</h3>
+    <p><strong>Answer:</strong> Since the architecture relies on Depot Wi-Fi upload, continuous internet is not required. The dashcam securely stores all snapshots and GPS tags locally during the route and uploads the batch when a connection is established at the end of the shift.</p>
+
+    <h3>3. How do you know the exact GPS location of the pothole?</h3>
+    <p><strong>Answer:</strong> The production version does not need its own expensive GPS module. Instead, the ESP32 sends a hardware trigger (via GPIO or UART) to the fleet's <em>existing</em> smart dashcam or telematics unit, which instantly takes a snapshot and tags it with its high-accuracy GPS coordinates.</p>
+
+    <h3>4. Why build custom hardware? Why not just use a smartphone app?</h3>
+    <p><strong>Answer:</strong> Smartphones aren't bolted to the car. If a driver drops their phone or takes a sharp turn, an app registers it as a massive pothole. Our custom hardware is physically mounted to the vehicle chassis, ensuring we only measure real road impacts with zero false positives.</p>
+
+    <h3>5. How is the device powered in the vehicle?</h3>
+    <p><strong>Answer:</strong> The production unit uses a built-in 12V/24V to 5V buck converter. This allows it to be safely hardwired directly into the vehicle's fuse box using a fuse tap, so it boots up automatically when the engine starts, completely hidden from the driver.</p>
+
+    <h3>6. Is it expensive to deploy this on every city bus or garbage truck?</h3>
+    <p><strong>Answer:</strong> Not at all. By reusing the fleet's existing dashcams and GPS units, our added hardware only costs about <strong>SAR 75 per vehicle</strong>. Because we upload via Depot Wi-Fi, there are zero ongoing monthly cellular data fees. It is significantly cheaper and infinitely faster than sending out manual road-inspection crews.</p>
+
+</body>
+</html>
