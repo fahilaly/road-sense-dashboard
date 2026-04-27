@@ -22,40 +22,33 @@ Integrating with existing onboard CCTV cameras, the system uses a modified **AAL
 ---
 
 ## Part 3: Municipal Fleet Hardware Integration
-Unlike consumer-grade apps, Road Sense is built for **Automotive Grade Integration**:
-*   **Hardware:** ESP32-C3 SuperMini + MPU6050 sensor package.
-*   **Power:** Direct 12V/24V integration via vehicle battery.
-*   **Data Source:** Uses existing high-accuracy vehicle GPS and CAN bus data (for speed compensation).
-*   **Connectivity:** 4G/LTE cellular transmission to the cloud dashboard.
+Unlike consumer-grade apps, Road Sense is built for **Automotive Grade Integration** that leverages existing fleet investments:
+*   **Hardware Trigger:** Low-cost ESP32-C3 SuperMini + MPU6050 vibration sensor on a custom PCB.
+*   **Power:** Safe 12V/24V to 5V buck converter integration via the vehicle fuse box.
+*   **Data Source:** Sends a GPIO/UART trigger to the fleet's existing smart dashcam/telematics unit for snapshot and GPS capture.
+*   **Connectivity:** Stores events locally on the dashcam and uploads via Depot Wi-Fi, completely eliminating cellular/LTE data costs.
 
 ---
 
 ## Part 4: Data Architecture & System Connection
 The connection between the physical hardware and the municipal dashboard follows a streamlined cloud pipeline:
 
-### 1. The Edge Device (ESP32)
-When a detection occurs, the ESP32 fuses the vibration magnitude with the GPS coordinates into a compact **JSON Payload**:
-```json
-{
-  "device_id": "BUS-MUNI-104",
-  "type": "detection",
-  "accel_z": -2.45,
-  "magnitude": 4.12,
-  "severity": "high",
-  "lat": 24.1234,
-  "lng": 47.5678
-}
-```
-The hardware executes an **HTTP POST Request** to send this JSON securely to the centralized cloud server: 
-`https://roadsence.onrender.com/api/sensor-data`
+### 1. The Edge Device (ESP32 Trigger)
+When a detection occurs, the ESP32 calculates the vibration magnitude. If it exceeds the calibrated threshold (Low: 1.5g, Med: 2.0g, High: 3.0g), the ESP32 generates a hardware trigger (GPIO pulse or UART message).
 
-### 2. The Backend Server (Node.js & Express)
-The cloud server acts as the middleman. Built using Node.js and Express (e.g., `server.js`), this backend exposes a **REST API endpoint** (like `api/reports/add`).
-*   **Verification:** The server validates the JSON structure.
-*   **Database:** Detections are saved to a persistent database (PostgreSQL/MongoDB) for historical trend analysis.
-*   **Broadcast:** The server pushes the update to all active dashboards using **WebSockets (Socket.io)** for instant, no-refresh map updates.
+### 2. Fleet Dashcam & Telematics Integration
+The ESP32 trigger is sent directly to the vehicle's existing smart dashcam or telematics unit.
+*   **Snapshot Capture:** The dashcam captures a single image snapshot of the road defect (avoiding expensive video uploads).
+*   **GPS Tagging:** The telematics unit attaches the exact GPS coordinates, timestamp, and vehicle ID to the event.
+*   **Local Storage:** The event is stored securely on the dashcam's local storage during the driving route.
 
-### 3. The Web Dashboard (Frontend)
+### 3. Depot Upload & Backend Server (Node.js & Express)
+When the vehicle returns to the municipal base, the telematics unit connects to the **Depot Wi-Fi** and uploads the day's verified road events to the cloud server. Built using Node.js and Express, this backend exposes a **REST API endpoint**.
+*   **Verification:** The server validates the JSON payload.
+*   **Database:** Detections are saved to a persistent database for historical trend analysis.
+*   **Broadcast:** The server pushes the update to all active dashboards using **WebSockets (Socket.io)** for instant map updates.
+
+### 4. The Web Dashboard (Frontend)
 The city planner's dashboard (Leaflet.js + HTML5) maintains an active WebSocket connection. When the server broadcasts a new detection, the map instantly drops a red marker at the exact GPS coordinate, alerting the road maintenance team within milliseconds of the event.
 
 ---
@@ -83,8 +76,8 @@ The city planner's dashboard (Leaflet.js + HTML5) maintains an active WebSocket 
 *   **Key Message:** Small, powerful, and integrates with existing vehicle telematics and cameras.
 
 ### Slide 6: Live Cloud Pipeline
-*   **Visual:** Flowchart: [Vehicle] -> [4G Network] -> [Render Cloud] -> [Live Dashboard].
-*   **Speaker Notes:** "To get data from the bus to the city official's screen, we use a robust cloud architecture. The vehicle transmits a JSON payload containing the GPS and severity data over a cellular network to our custom Node.js backend hosted on Render at `roadsence.onrender.com`. The server permanently logs the issue in our database, which instantly updates the live Leaflet map on our web dashboard in real-time."
+*   **Visual:** Flowchart: [ESP32 Trigger] -> [Dashcam Snapshot] -> [Depot Wi-Fi] -> [Render Cloud].
+*   **Speaker Notes:** "To get data from the bus to the city official's screen cost-effectively, we leverage the fleet's existing hardware. When the ESP32 feels a pothole, it triggers the dashcam to take a single snapshot and tag the GPS location. When the bus returns to base, it uploads all events via depot Wi-Fi to our Node.js backend hosted on Render, completely eliminating massive cellular data costs."
 
 ### Slide 7: Economic Impact & ROI
 *   **Visual:** A chart showing "Cost of Repair" (Small crack vs. Massive sinkhole over time).
