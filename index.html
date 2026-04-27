@@ -193,31 +193,32 @@
         <!-- Analytics Placeholder Section -->
         <section id="analytics" class="analytics-section glass-panel mt-6">
             <div class="card-header border-bottom">
-                <h2>Predictive Analytics Overview</h2>
+                <h2>Predictive Analytics & Financial Impact</h2>
             </div>
             <div class="analytics-kpis">
                 <div class="stat-card" style="background:var(--bg-color); padding: 1.5rem; border-radius:12px; border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
-                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="warning-outline" style="color:var(--danger); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Predicted Failures (30d)</p>
-                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;">24 <span style="font-size:1rem; font-weight:500; color:var(--danger);">High Risk</span></h3>
+                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="warning-outline" style="color:var(--danger); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Critical Segments (PCI &lt; 50.3)</p>
+                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;">24 <span style="font-size:1rem; font-weight:500; color:var(--danger);">Require Immediate Action</span></h3>
                 </div>
                 <div class="stat-card" style="background:var(--bg-color); padding: 1.5rem; border-radius:12px; border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
-                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="trending-down-outline" style="color:var(--success); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Proactive Cost Savings</p>
-                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;"><span style="font-size:1.2rem; font-weight:600; color:var(--text-secondary);">SAR</span> 534,000 <span style="font-size:1rem; font-weight:500; color:var(--success);">YTD</span></h3>
+                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="trending-down-outline" style="color:var(--success); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Projected Budget Reduction</p>
+                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;">32.5% <span style="font-size:1rem; font-weight:500; color:var(--success);">Est. Annual Savings</span></h3>
                 </div>
                 <div class="stat-card" style="background:var(--bg-color); padding: 1.5rem; border-radius:12px; border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
-                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="calendar-clear-outline" style="color:var(--primary); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Optimal Maintenance</p>
-                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;">Oct 12-18</h3>
+                    <p style="margin:0; font-weight:600; font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;"><ion-icon name="cash-outline" style="color:var(--primary); font-size:1.2rem; vertical-align:-3px;"></ion-icon> Early Intervention ROI</p>
+                    <h3 style="color:var(--text-primary); font-size:2rem; margin-top:0.5rem;">1 : 10 <span style="font-size:1rem; font-weight:500; color:var(--text-secondary);">Cost Avoidance Ratio</span></h3>
                 </div>
             </div>
             <div class="analytics-content" style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem;">
                 <div class="chart-card">
-                    <h3>Projected Defect Escalation (6-Month Forecast)</h3>
-                    <div id="deteriorationChart"></div>
+                    <h3 style="margin-bottom: 0.5rem;">Financial Impact: Early Repair vs Delayed Reconstruction</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Comparison of repair costs (SAR per meter) over time. Delaying a crack seal (SAR 4-11) leads to costly pothole reconstruction (SAR 100-200).</p>
+                    <div id="costEscalationChart"></div>
                 </div>
                 <div class="bottom-charts-grid">
                     <div class="chart-card">
-                        <h3>Detections by Type</h3>
-                        <div id="distributionChart"></div>
+                        <h3>System Capital Cost vs Traditional</h3>
+                        <div id="capitalCostChart"></div>
                     </div>
                     <div class="chart-card">
                         <h3>Sensor Fleet Uptime</h3>
