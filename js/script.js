@@ -642,58 +642,58 @@ function renderReports() {
 }
 
 function initCharts() {
-    // Financial Impact Chart (Early vs Delayed)
-    const costEscalationOptions = {
+    // Defect Escalation Forecast Area Chart
+    const deteriorationOptions = {
         series: [{
-            name: 'Early Repair (Crack Seal)',
-            type: 'line',
-            data: [7, 7, 7, 7, 7, 7]
-        }, {
-            name: 'Delayed Repair (Reconstruction)',
-            type: 'area',
-            data: [0, 0, 0, 45, 150, 200]
+            name: 'Forecasted Severe Failures',
+            data: [24, 38, 65, 110, 165, 230]
         }],
         chart: {
             height: 380,
-            type: 'line',
+            type: 'area',
             toolbar: { show: false },
-            fontFamily: 'Inter, sans-serif'
+            fontFamily: 'Inter, sans-serif',
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
         },
-        stroke: { curve: 'smooth', width: [3, 3] },
-        fill: { type: ['solid', 'gradient'], gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.05, stops: [0, 90, 100] } },
-        colors: ['#10b981', '#ef4444'],
+        stroke: { curve: 'smooth', width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.5, opacityTo: 0.05, stops: [0, 90, 100] } },
+        colors: ['#ef4444'],
         dataLabels: { enabled: false },
         labels: ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'],
         xaxis: { 
-            title: { text: 'Time Since Defect Formation', style: { color: '#94a3b8', fontSize: '13px' } },
+            title: { text: 'Timeline if Interventions are Delayed', style: { color: '#94a3b8', fontSize: '13px' } },
             labels: { style: { colors: '#475569' } }
         },
         yaxis: { 
-            title: { text: 'Repair Cost (SAR / meter)', style: { color: '#94a3b8', fontSize: '13px' } },
-            labels: { formatter: function(val) { return "SAR " + val; }, style: { colors: '#475569' } }
+            title: { text: 'Total Active Unrepaired Defects', style: { color: '#94a3b8', fontSize: '13px' } },
+            labels: { style: { colors: '#475569' } }
+        },
+        annotations: {
+            yaxis: [{
+                y: 100,
+                borderColor: '#f59e0b',
+                strokeDashArray: 4,
+                label: { borderColor: '#f59e0b', style: { color: '#fff', background: '#f59e0b' }, text: 'Critical City Threshold' }
+            }]
         },
         tooltip: { theme: 'light' }
     };
 
-    const costEscalationChart = new ApexCharts(document.querySelector("#costEscalationChart"), costEscalationOptions);
-    costEscalationChart.render();
+    const deteriorationChart = new ApexCharts(document.querySelector("#deteriorationChart"), deteriorationOptions);
+    deteriorationChart.render();
 
-    // Capital Cost Chart (Bar)
-    const capitalCostOptions = {
-        series: [{
-            name: 'Capital Cost (SAR)',
-            data: [3750000, 105000] // 3.75M vs 105k
-        }],
-        chart: { type: 'bar', height: 260, fontFamily: 'Inter, sans-serif', toolbar: {show: false} },
-        plotOptions: { bar: { borderRadius: 4, horizontal: true, distributed: true } },
-        dataLabels: { enabled: true, formatter: function(val) { return "SAR " + (val/1000).toFixed(0) + "k"; } },
-        colors: ['#ef4444', '#10b981'],
-        xaxis: { categories: ['Traditional (ARAN) per vehicle', 'Road Sense (Full City - 5000 units)'], labels: {show: false} },
-        legend: { show: false },
-        tooltip: { theme: 'light' }
+    // Distribution Chart (Donut)
+    const distributionOptions = {
+        series: [45, 30, 15, 10],
+        chart: { type: 'donut', height: 260, fontFamily: 'Inter, sans-serif' },
+        labels: ['Uneven Surface', 'Surface Crack', 'Deep Pothole', 'Degradation'],
+        colors: ['#2563eb', '#f59e0b', '#ef4444', '#64748b'],
+        plotOptions: { pie: { donut: { size: '65%' } } },
+        dataLabels: { enabled: false },
+        legend: { position: 'bottom', fontSize: '11px', itemMargin: { horizontal: 5, vertical: 0 } },
+        stroke: { show: false }
     };
-    const capitalCostChart = new ApexCharts(document.querySelector("#capitalCostChart"), capitalCostOptions);
-    capitalCostChart.render();
+    new ApexCharts(document.querySelector("#distributionChart"), distributionOptions).render();
 
     // Uptime Radial Chart
     const uptimeOptions = {
