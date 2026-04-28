@@ -33,7 +33,7 @@ Intelligent Infrastructure Monitoring
 **Built for road owners and daily road users.**
 * Municipalities
 * Fleet operators
-* Drivers
+* Road users
 **Source:** KSA target: 6th globally in road infrastructure quality — Ministry of Transport.
 
 ---
@@ -78,7 +78,7 @@ Intelligent Infrastructure Monitoring
 **Low-cost hardware using existing fleet systems.**
 * Fuse-box powered
 * Existing dashcam/GPS
-* At SAR 75 average, 5,000 vehicles ≈ SAR 375K
+* SAR 50–100 per sensor unit
 **Source:** Road Sense internal cost model, excluding existing dashcam/GPS.
 
 ---
@@ -96,7 +96,7 @@ Intelligent Infrastructure Monitoring
 ```text
 Sensor detects vibration
 ↓
-Dashcam captures snapshot + GPS/time
+Compatible dashcam captures snapshot + GPS/time
 ↓
 Depot Wi-Fi uploads to dashboard
 ```
@@ -125,3 +125,4 @@ Depot Wi-Fi uploads to dashboard
 * Smarter monitoring
 * Faster decisions
 * Scalable impact
+* [Innovator Names] - [Institution]
