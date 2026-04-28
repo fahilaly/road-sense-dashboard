@@ -1,7 +1,5 @@
 # Road Sense — Final 5-Minute XTHON Pitch Script
 
-**Format:** 1 short statement per slide + 3 simple points max. Clean, safe, and fast to present.
-
 ---
 
 ## 1. Title
@@ -94,12 +92,21 @@ Intelligent Infrastructure Monitoring
 ## 11. Technical Architecture
 **Event-based edge–cloud flow.**
 ```text
-Sensor detects vibration
-↓
-Compatible dashcam captures snapshot + GPS/time
-↓
-Depot Wi-Fi uploads to dashboard
+ESP32-C3 + IMU sensor PCB
+        ↓
+Detect abnormal road vibration
+        ↓
+Trigger compatible fleet dashcam/telematics system
+        ↓
+Capture one snapshot + GPS/time
+        ↓
+Store locally during the route
+        ↓
+Upload at depot/base Wi-Fi
+        ↓
+Cloud dashboard + analytics
 ```
+*Note: The ESP32 handles detection only; the compatible fleet system handles snapshot, GPS, storage, and upload.*
 
 ---
 
@@ -125,4 +132,3 @@ Depot Wi-Fi uploads to dashboard
 * Smarter monitoring
 * Faster decisions
 * Scalable impact
-* [Innovator Names] - [Institution]
