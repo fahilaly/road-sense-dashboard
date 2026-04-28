@@ -51,7 +51,7 @@ Intelligent Infrastructure Monitoring
 **We proved vibration detection and dashboard communication.**
 * ESP32-C3
 * MPU6050 sensor
-* Cloud dashboard
+* Live dashboard test
 **Source:** Road Sense prototype test.
 
 ---
@@ -78,16 +78,16 @@ Intelligent Infrastructure Monitoring
 **Low-cost hardware using existing fleet systems.**
 * Fuse-box powered
 * Existing dashcam/GPS
-* SAR 50–100 per vehicle
+* At SAR 75 average, 5,000 vehicles ≈ SAR 375K
 **Source:** Road Sense internal cost model, excluding existing dashcam/GPS.
 
 ---
 
 ## 10. Challenges & Risks
 **Key risks are integration, accuracy, and privacy.**
-* Dashcam compatibility
-* False positives
-* Data privacy
+* Dashcam compatibility → compatible fleet systems
+* False positives → snapshot verification
+* Data privacy → one road snapshot only
 
 ---
 
