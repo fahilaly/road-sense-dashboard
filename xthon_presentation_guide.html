@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road Sense — Final 5-Minute XTHON Pitch Deck</title>
+    <title>Road Sense — Final XTHON Pitch Deck</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --primary:#2563eb; --bg:#0f172a; --card:#1e293b; --text:#e2e8f0; --accent:#f59e0b; }
@@ -15,16 +15,17 @@
         h3 { color:#fff; font-size:1.15rem; margin-bottom:10px; }
         ul { padding-left:20px; }
         li { margin-bottom:8px; font-size:1.05rem; }
-        .flow-box { background:#334155; padding:15px; border-radius:8px; font-family:monospace; color:#fff; text-align:center; font-size:1.1rem; line-height:2; margin:15px 0;}
+        .flow-box { background:#334155; padding:15px; border-radius:8px; font-family:monospace; color:#fff; text-align:center; font-size:1rem; line-height:1.6; margin:15px 0;}
         .source { margin-top: 15px; font-size: 0.85rem; color: #94a3b8; font-style: italic; }
+        .note { margin-top: 10px; font-size: 0.9rem; color: #cbd5e1; border-top: 1px solid #475569; padding-top: 5px; }
         .visual-tip { background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent); padding: 12px 15px; margin-top: 15px; font-size: 0.95rem; color: #fcd34d; }
     </style>
 </head>
 <body>
 <div class="container">
 
-    <h1>Road Sense — Final 5-Minute Pitch Outline</h1>
-    <p style="text-align:center; color:#94a3b8; margin-bottom:30px;">1 short statement + 3 simple points max. Clean, safe, and fast to present.</p>
+    <h1>Road Sense — Final XTHON Pitch Outline</h1>
+    <p style="text-align:center; color:#94a3b8; margin-bottom:30px;">Exact text and structure for the 5-minute presentation.</p>
 
     <div class="slide">
         <h2>1. Title</h2>
@@ -143,13 +144,22 @@
         <h2>11. Technical Architecture</h2>
         <h3>Event-based edge–cloud flow.</h3>
         <div class="flow-box">
-            Sensor detects vibration<br>
+            ESP32-C3 + IMU sensor PCB<br>
             ↓<br>
-            Compatible dashcam captures snapshot + GPS/time<br>
+            Detect abnormal road vibration<br>
             ↓<br>
-            Depot Wi-Fi uploads to dashboard
+            Trigger compatible fleet dashcam/telematics system<br>
+            ↓<br>
+            Capture one snapshot + GPS/time<br>
+            ↓<br>
+            Store locally during the route<br>
+            ↓<br>
+            Upload at depot/base Wi-Fi<br>
+            ↓<br>
+            Cloud dashboard + analytics
         </div>
-        <div class="visual-tip"><strong>🖼️ Visual Suggestion:</strong> Clean, horizontal 3-step icon flowchart matching the text exactly.</div>
+        <div class="note"><strong>Small note:</strong> The ESP32 handles detection only; the compatible fleet system handles snapshot, GPS, storage, and upload.</div>
+        <div class="visual-tip"><strong>🖼️ Visual Suggestion:</strong> Clean, horizontal flow diagram matching the text exactly.</div>
     </div>
 
     <div class="slide">
@@ -182,7 +192,6 @@
             <li>Smarter monitoring</li>
             <li>Faster decisions</li>
             <li>Scalable impact</li>
-            <li>[Innovator Names] - [Institution]</li>
         </ul>
         <div class="visual-tip"><strong>🖼️ Visual Suggestion:</strong> Powerful closing image of a pristine smart highway with your Team Photo and a QR Code.</div>
     </div>
